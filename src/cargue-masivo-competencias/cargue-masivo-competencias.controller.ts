@@ -1,0 +1,75 @@
+import {
+  Body,
+  Controller,
+  Post,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CargueMasivoCompetenciasService } from './cargue-masivo-competencias.service';
+import { diskStorage } from 'multer';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { AdminAuthGuard } from 'src/guard/admin.guard';
+
+@ApiTags('Carga masiva de competencias')
+//@UseGuards(AdminAuthGuard)
+@Controller('carguemasivocompetencias')
+export class CargueMasivoCompetenciasController {
+  constructor(private readonly cargue: CargueMasivoCompetenciasService) {}
+  @ApiBody({
+    type: 'ObjectId',
+    description: 'Programa: ObjectId del programa',
+  })
+  @Post('cargar')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(
+            null,
+            `${file.fieldname}-${uniqueSuffix}.${
+              file.originalname.split('.')[1]
+            }`,
+          );
+        },
+      }),
+    }),
+  )
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('programa') programa: string,
+  ): Promise<string> {
+    const result = await this.cargue.processCsv(file, programa);
+    return result;
+  }
+
+
+  @Post('cargarinstructor')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(
+            null,
+            `${file.fieldname}-${uniqueSuffix}.${
+              file.originalname.split('.')[1]
+            }`,
+          );
+        },
+      }),
+    }),
+  )
+  async uploadFileInstructor(
+    @UploadedFile() file: Express.Multer.File,
+      ): Promise<string> {
+    const result = await this.cargue.processInstructor(file);
+    return result;
+  }
+}
