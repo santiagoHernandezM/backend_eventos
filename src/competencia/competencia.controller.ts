@@ -17,7 +17,7 @@ import { AdminAuthGuard } from 'src/guard/admin.guard';
 
 
 @ApiTags('Competencia')
-@UseGuards(AdminAuthGuard)
+// @UseGuards(AdminAuthGuard)
 @Controller('competencia')
 export class CompetenciaController {
   constructor(private readonly competenciaService: CompetenciaService) {}

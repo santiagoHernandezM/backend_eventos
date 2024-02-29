@@ -15,7 +15,7 @@ import { InstructorAuthGuard } from 'src/guard/instructor.guard';
 import { AdminAuthGuard } from 'src/guard/admin.guard';
 
 @ApiTags('Centro')
-@UseGuards(AdminAuthGuard)
+// @UseGuards(AdminAuthGuard)
 //@UseGuards(InstructorAuthGuard)
 @Controller('centro')
 export class CentroController {

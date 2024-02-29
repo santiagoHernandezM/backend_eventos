@@ -14,7 +14,7 @@ import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { CoordinadorAuthGuard } from 'src/guard/coordinador.guard';
 
 @ApiTags('Sedes')
-@UseGuards(CoordinadorAuthGuard)
+// @UseGuards(CoordinadorAuthGuard)
 @Controller('sedes')
 export class SedesController {
   constructor(private readonly sede: SedesService) {}
