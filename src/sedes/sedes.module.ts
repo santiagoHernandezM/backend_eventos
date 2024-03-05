@@ -4,10 +4,16 @@ import { SedesService } from './sedes.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Sede, SedeSchema } from './schema/sede.schema';
 import { CentroModule } from 'src/centro/centro.module';
+import { Bloque, BloqueSchema } from 'src/bloque/schema/bloque.schema';
+import { Ambiente, AmbienteSchema } from 'src/ambiente/schemas/ambiente.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Sede.name, schema: SedeSchema }]),
+    MongooseModule.forFeature([
+      { name: Sede.name, schema: SedeSchema },
+      { name: Bloque.name, schema: BloqueSchema },
+      { name: Ambiente.name, schema: AmbienteSchema },
+    ]),
     CentroModule,
   ],
   controllers: [SedesController],

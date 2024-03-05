@@ -1,12 +1,21 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { ActualizarRegionalDto, RegionalDto } from './dto/regional.dto';
 import { Regional } from './schema/regional.schema';
+import { Centro } from 'src/centro/schema/centro.schema';
+import { Sede } from 'src/sedes/schema/sede.schema';
+import { Bloque } from 'src/bloque/schema/bloque.schema';
+import { Ambiente } from 'src/ambiente/schemas/ambiente.schema';
+
 @Injectable()
 export class RegionalService {
   constructor(
     @InjectModel(Regional.name) private regionalModel: Model<Regional>,
+    @InjectModel(Centro.name) private centroModel: Model<Centro>,
+    @InjectModel(Sede.name) private sedeModel: Model<Sede>,
+    @InjectModel(Bloque.name) private bloqueModel: Model<Bloque>,
+    @InjectModel(Ambiente.name) private ambienteModel: Model<Ambiente>,
   ) {}
 
   // obtener todas las regionales
@@ -57,8 +66,41 @@ export class RegionalService {
     }
   }
 
-  // eliminar una regional
   async eliminarRegional(id: string) {
+
+    try {
+
+      const centros = await this.centroModel.find({regional: id})
+      if (centros.length){
+        centros.forEach(async(centro) => {
+          
+          const sedes = await this.sedeModel.find({centro: centro._id})
+          if (sedes.length){
+
+            sedes.forEach(async(sede) => {
+              const bloques = await this.bloqueModel.find({sede: sede._id})
+              if (bloques.length){
+                await this.bloqueModel.deleteMany({sede: sede._id})
+              }
+
+              const ambientes = await this.ambienteModel.find({sede: sede._id})
+              if (ambientes.length){
+                await this.ambienteModel.deleteMany({sede: sede._id})
+              }
+            })
+
+            await this.sedeModel.deleteMany({centro: centro._id})
+          }
+        })
+        
+        await this.centroModel.deleteMany({regional: id})
+      }
+      
+    } catch (error) {
+      console.log(error)
+    }
+
+
     return await this.regionalModel.findByIdAndRemove(id).then((data) => {
       return data
         ? data
@@ -67,6 +109,7 @@ export class RegionalService {
           );
     });
   }
+
   // actualizar una regional
   // async update_regional(id: string, regional_dto: Regional_Dto) {
   //   return await this.regionalModel

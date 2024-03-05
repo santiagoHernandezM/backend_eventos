@@ -67,9 +67,10 @@ export class ActualizarProgramaDto {
   })
   @IsNotEmpty()
   @IsMongoId()
-  @Matches(/^(?!\s*$).+/, { message: 'El Id no puede ser estar vacío' })
+  // @Matches(/^(?!\s*$).+/, { message: 'El Id no puede ser estar vacío' })
+  @IsOptional()
   readonly id: string;
-
+  
   @ApiProperty({
     type: String,
     description: 'codigo del programa',
@@ -77,9 +78,9 @@ export class ActualizarProgramaDto {
   })
   @IsOptional()
   @IsNotEmpty()
-  @Matches(/^(?!\s*$).+/, {
-    message: 'El codigo del programa no puede estar vacío',
-  })
+  // @Matches(/^(?!\s*$).+/, {
+  //   message: 'El codigo del programa no puede estar vacío',
+  // })
   readonly codigo: string;
   
   @ApiProperty({
@@ -87,7 +88,7 @@ export class ActualizarProgramaDto {
     description: 'Nombre del programa',
     default: 'Análisis y desarrollo de software',
   })
-  @Matches(/^(?!\s*$).+/, { message: 'El nombre no puede ser estar vacío' })
+  // @Matches(/^(?!\s*$).+/, { message: 'El nombre no puede ser estar vacío' })
   @IsOptional()
   @IsNotEmpty()
   readonly nombre: string;
@@ -97,9 +98,9 @@ export class ActualizarProgramaDto {
     description: 'Nivel de formación',
     default: 'Tecnólogo',
   })
-  @Matches(/^(?!\s*$).+/, {
-    message: 'El nivel de formacion no puede ser estar vacío',
-  })
+  // @Matches(/^(?!\s*$).+/, {
+  //   message: 'El nivel de formacion no puede ser estar vacío',
+  // })
   @IsOptional()
   @IsNotEmpty()
   readonly nivel: string;
@@ -109,7 +110,6 @@ export class ActualizarProgramaDto {
     description: 'La versión del programa',
     default: '1.0',
   })
-  @Matches(/^(?!\s*$).+/, { message: 'La version no puede ser estar vacío' })
   @IsOptional()
   @IsNotEmpty()
   readonly version: string;
@@ -119,7 +119,7 @@ export class ActualizarProgramaDto {
     description: 'La duración de la competencia en horas',
     default: 40,
   })
-  @Matches(/^(?!\s*$).+/, { message: 'La version no puede ser estar vacío' })
+  // @Matches(/^(?!\s*$).+/, { message: 'La version no puede ser estar vacío' })
   @IsOptional()
   @IsNotEmpty()
   readonly duracion: number;

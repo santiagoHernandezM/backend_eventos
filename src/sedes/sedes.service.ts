@@ -3,10 +3,18 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Sede } from './schema/sede.schema';
 import { Model } from 'mongoose';
 import { ActualizarSedeDto, SedeDto } from './dto/sedes.dto';
+import { Bloque } from 'src/bloque/schema/bloque.schema';
+import { Ambiente } from 'src/ambiente/schemas/ambiente.schema';
 
 @Injectable()
 export class SedesService {
-  constructor(@InjectModel(Sede.name) private SedesModel: Model<Sede>) {}
+  constructor(
+    @InjectModel(Sede.name) private SedesModel: Model<Sede>,
+
+    @InjectModel(Bloque.name) private bloqueModel: Model<Bloque>,
+
+    @InjectModel(Ambiente.name) private ambienteModel: Model<Ambiente>,
+  ) {}
 
   async obtenerTodo(): Promise<NotFoundException | Sede[]> {
     return await this.SedesModel.find()
@@ -26,6 +34,23 @@ export class SedesService {
   }
 
   async borrarSede(id: string) {
+    try {
+      // Eliminación de bloques
+      const bloques = await this.bloqueModel.find({sede: id})
+      if (bloques.length > 0){
+        await this.bloqueModel.deleteMany({sede: id})
+      }
+      
+      // Eliminación de ambientes
+      const ambientes = await this.ambienteModel.find({sede: id})
+      if (ambientes.length > 0){
+        await this.ambienteModel.deleteMany({sede: id})
+      }
+
+    } catch (error) {
+      console.log(error)
+    }
+
     return await this.SedesModel.findByIdAndRemove(id).then((data) => {
       if (data) {
         return data;

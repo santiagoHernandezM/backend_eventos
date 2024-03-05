@@ -83,7 +83,7 @@ export class ProgramaService {
       programa,
     ).then((data) => {
       return data
-        ? data
+        ? programa
         : new NotFoundException(
             `No se encontro el programa con id:${programa.id}`,
           );

@@ -4,11 +4,17 @@ import { Model } from 'mongoose';
 import { Centro } from './schema/centro.schema';
 import { ActualizarCentroDto, CentroDto } from './dto/centro.dto';
 import { RegionalService } from '../regional/regional.service';
+import { Sede } from 'src/sedes/schema/sede.schema';
+import { Bloque } from 'src/bloque/schema/bloque.schema';
+import { Ambiente } from 'src/ambiente/schemas/ambiente.schema';
 
 @Injectable()
 export class CentroService {
   constructor(
     @InjectModel(Centro.name) private centroModel: Model<Centro>,
+    @InjectModel(Sede.name) private sedeModel: Model<Sede>,
+    @InjectModel(Bloque.name) private bloqueModel: Model<Bloque>,
+    @InjectModel(Ambiente.name) private ambienteModel: Model<Ambiente>,
     @Inject(RegionalService) private regionalService: RegionalService,
   ) {}
 
@@ -51,6 +57,34 @@ export class CentroService {
   }
 
   async eliminarCentro(id: string) {
+    try {
+      // se deben eliminar las sedes, los bloques, los ambientes, y las fichas asociadas
+      const sedes = await this.sedeModel.find({centro: id})
+      console.log(sedes)
+
+
+      if (sedes.length > 0){
+
+        sedes.forEach(async({ _id }) => {
+
+          const bloques = await this.bloqueModel.find({sede: _id})
+          if (bloques.length > 0){
+            await this.bloqueModel.deleteMany({sede: _id})
+          }
+
+          const ambientes = await this.ambienteModel.find({sede: _id})
+          if (ambientes.length > 0){
+            await this.ambienteModel.deleteMany({sede: _id})
+          }
+        })
+
+        await this.sedeModel.deleteMany({centro: id})
+      }
+      
+    } catch (error) {
+      console.log(error)
+    }
+
     return await this.centroModel.findByIdAndRemove(id).then((data) => {
       if (data) {
         return data;
