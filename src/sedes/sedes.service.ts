@@ -76,5 +76,6 @@ export class SedesService {
     return await this.SedesModel.find({
       centro: idCentro
     })
+    .populate('centro')
   }
 }
