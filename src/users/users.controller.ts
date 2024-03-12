@@ -14,7 +14,7 @@ import { ValidateObjectidPipe } from 'src/common/validate-objectid/validate-obje
 import { AdminAuthGuard } from 'src/guard/admin.guard';
 
 @ApiTags('Usuarios')
-@UseGuards(AdminAuthGuard)
+// @UseGuards(AdminAuthGuard)
 @Controller('user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

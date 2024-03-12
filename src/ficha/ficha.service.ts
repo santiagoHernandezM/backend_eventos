@@ -21,6 +21,7 @@ export class FichaService {
     return await this.fichaModel
       .find()
       .populate('instructor')
+      .populate('sede')
       .populate('ambiente')
       .populate('programa')
       .populate({
