@@ -19,6 +19,14 @@ export class SedesService {
   async obtenerTodo(): Promise<NotFoundException | Sede[]> {
     return await this.SedesModel.find()
       .populate('centro')
+      .populate({
+        path: 'centro',
+        populate: [
+          {
+            path: 'regional'
+          }
+        ]
+      })
       .then((data) => {
         if (data) {
           return data;
@@ -76,6 +84,13 @@ export class SedesService {
     return await this.SedesModel.find({
       centro: idCentro
     })
-    .populate('centro')
+    // .populate('centro')
+    .populate({
+      path: 'centro',
+      populate: {
+        path: 'regional'
+      }
+      
+    })
   }
 }

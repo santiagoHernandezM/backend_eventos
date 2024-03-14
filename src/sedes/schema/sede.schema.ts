@@ -15,8 +15,8 @@ export class Sede {
   @Prop()
   lugar_funcionamiento: string;
 
-  @Prop()
-  departamento: string;
+  // @Prop()
+  // departamento: string;
 
   @Prop()
   municipio: string;

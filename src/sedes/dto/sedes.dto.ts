@@ -22,11 +22,11 @@ export class SedeDto {
   @IsNotEmpty()
   readonly lugar_funcionamiento: string;
 
-  @Matches(/^(?!\s*$).+/, {
-    message: 'El departamento no puede ser estar vacío',
-  })
-  @IsNotEmpty()
-  readonly departamento: string;
+  // @Matches(/^(?!\s*$).+/, {
+  //   message: 'El departamento no puede ser estar vacío',
+  // })
+  // @IsNotEmpty()
+  // readonly departamento: string;
 
   @Matches(/^(?!\s*$).+/, { message: 'El municipio no puede ser estar vacío' })
   @IsNotEmpty()
@@ -53,11 +53,11 @@ export class ActualizarSedeDto {
   @IsNotEmpty()
   readonly lugar_funcionamiento: string;
 
-  @Matches(/^(?!\s*$).+/, {
-    message: 'El departamento no puede ser estar vacío',
-  })
-  @IsNotEmpty()
-  readonly departamento: string;
+  // @Matches(/^(?!\s*$).+/, {
+  //   message: 'El departamento no puede ser estar vacío',
+  // })
+  // @IsNotEmpty()
+  // readonly departamento: string;
 
   @Matches(/^(?!\s*$).+/, { message: 'El municipio no puede ser estar vacío' })
   @IsNotEmpty()

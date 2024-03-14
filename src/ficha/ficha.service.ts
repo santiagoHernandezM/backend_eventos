@@ -22,7 +22,7 @@ export class FichaService {
       .find()
       .populate('instructor')
       .populate('sede')
-      .populate('ambiente')
+      // .populate('ambiente')
       .populate('programa')
       .populate({
         path: 'ambiente',
