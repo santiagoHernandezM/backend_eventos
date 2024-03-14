@@ -22,10 +22,10 @@ export class User {
   @Prop({ required: true, select: false })
   password: string;
 
-  @Prop({ required: true })
+ @Prop({ required: true })
   celular: string;
 
-  @Prop({ required: true })
+ @Prop({ required: true })
   contrato: ContratoDto;
 
   @Prop({

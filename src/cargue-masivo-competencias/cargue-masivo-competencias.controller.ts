@@ -68,8 +68,11 @@ export class CargueMasivoCompetenciasController {
   )
   async uploadFileInstructor(
     @UploadedFile() file: Express.Multer.File,
+    @Body('centro') centro: string,
       ): Promise<string> {
-    const result = await this.cargue.processInstructor(file);
+     
+    const result = await this.cargue.processInstructor(file,centro);
     return result;
+   
   }
 }

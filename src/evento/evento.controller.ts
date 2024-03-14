@@ -18,7 +18,7 @@ import {
 import { InstructorAuthGuard } from 'src/guard/instructor.guard';
 
 @ApiTags('Evento')
-@UseGuards(InstructorAuthGuard)
+//@UseGuards(InstructorAuthGuard)
 @Controller('evento')
 export class EventoController {
   constructor(private readonly eventoService: EventoService) {}

@@ -6,7 +6,7 @@ import { JwtAuthGuard } from './guard/jwt-auth.guard';
 // import fc from 'festivos-colombia';
 const fc = require('festivos-colombia');
 
-@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}

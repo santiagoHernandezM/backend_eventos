@@ -61,7 +61,8 @@ export class CargueMasivoCompetenciasService {
   }
 
   async processInstructor(
-    file: Express.Multer.File
+    file: Express.Multer.File,
+    centro: string
    
   ): Promise<string> {
     const excelJson = await excelToJson({
@@ -80,25 +81,26 @@ export class CargueMasivoCompetenciasService {
           correo: columna['D'],
           celular: columna['E'],
           password : columna['A'],
-          centro : '65107cceecf33044f0f5aa52',
+          centro : centro,
           contrato : {
             numero : columna['F'],
             fechaInicio : columna['G'],
             fechaTerminacion : columna['H'],
-            tipoVinculacion : 'Contrato'
+            tipoVinculacion : columna['I'],
           },
-          roles : ['Contratista'],
+          roles : ['Instructor'],
           programas: [],
         };
 
         //Key de la competencia(Fila del excel)
-        const columnas = Object.keys(columna);
+       /* const columnas = Object.keys(columna);
         for (let x = 9; x < columnas.length; x++) {
           if (columna[columnas[x]] != '') {
              instructor.programas.push(columna[columnas[x]]);
           } else break;
-        }
-
+        }*/
+        
+      console.log(JSON.stringify(instructor))
         this.crearInstructor(instructor);
 
       }

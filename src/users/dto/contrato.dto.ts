@@ -22,7 +22,7 @@ export class ContratoDto {
   @Matches(/^(?!\s*$).+/, {
     message: 'El campo fecha de inicio no debe estar vacio',
   })
-  readonly fechaInicio: string;
+  readonly fechaInicio: Date;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -30,7 +30,7 @@ export class ContratoDto {
   @Matches(/^(?!\s*$).+/, {
     message: 'El campo fecha de inicio no debe estar vacio',
   })
-  readonly fechaTerminacion: string;
+  readonly fechaTerminacion: Date;
 
   @ApiProperty()
   @IsNotEmpty()
