@@ -61,7 +61,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         'programas',
         'centro',
         'roles',
-      ]);
+      ])
+      .populate('programas');
     if (!userBd) {
       throw new UnauthorizedException('El usuario no esta registrado');
     } else if (!bcrypt.compareSync(password, userBd.password)) {

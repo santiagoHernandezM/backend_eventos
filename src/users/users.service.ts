@@ -14,11 +14,14 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async findOne(name: string) {
-    return this.userModel.findOne({ name });
+      return this.userModel.findOne({ name })
+    .populate('programas')
+    ;
+    
   }
 
   async findOneAuth(email: string) {
-    return await this.userModel.findOne({ email: email });
+     return await this.userModel.findOne({ email: email });
   }
   async crearUser(user: UserDto) {
     const existeCorreo = await this.validarCorreo(user.correo);
@@ -39,7 +42,8 @@ export class UsersService {
   }
 
   async validarCorreo(email: string): Promise<boolean> {
-    const user = await this.userModel.findOne({ correo: email });
+      const user = await this.userModel.findOne({ correo: email })
+    
     if (user) {
       return true;
     }

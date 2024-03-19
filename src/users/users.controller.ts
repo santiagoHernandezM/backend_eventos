@@ -26,7 +26,7 @@ export class UsersController {
   })
   @Get('find-one/:name')
   async findOne(@Param('name') name: string) {
-    return await this.usersService.findOne(name);
+      return await this.usersService.findOne(name);
   }
 
   @Get('/instructor')
