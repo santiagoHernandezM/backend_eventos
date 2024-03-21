@@ -8,20 +8,25 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
 import { UserDto } from './dto/user.dto';
 import * as bcrypt from 'bcrypt';
+import { AsignarProgramasDto } from './dto/asignarprogramas.dto';
+import { ProgramaService } from 'src/programa/programa.service';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+    private readonly programaService: ProgramaService,
+  ) {}
 
   async findOne(name: string) {
-      return this.userModel.findOne({ name })
-    .populate('programas')
-    ;
-    
+    return this.userModel
+      .findOne({ name })
+      .populate('centro')
+      .populate('programas');
   }
 
   async findOneAuth(email: string) {
-     return await this.userModel.findOne({ email: email });
+    return await this.userModel.findOne({ email: email });
   }
   async crearUser(user: UserDto) {
     const existeCorreo = await this.validarCorreo(user.correo);
@@ -42,8 +47,8 @@ export class UsersService {
   }
 
   async validarCorreo(email: string): Promise<boolean> {
-      const user = await this.userModel.findOne({ correo: email })
-    
+    const user = await this.userModel.findOne({ correo: email });
+
     if (user) {
       return true;
     }
@@ -65,12 +70,51 @@ export class UsersService {
   }
 
   async getInstructor() {
-    return await this.userModel.find({ roles: { $in: 'Instructor' } });
+    return await this.userModel
+      .find({ roles: { $in: 'Instructor' } })
+      .populate({
+        path: 'centro',
+        populate: {
+          path: 'regional',
+        },
+      })
+      .populate('programas');
   }
+
   async getInstructorById(id: string) {
-    return await this.userModel.findOne({
-      roles: { $in: ['Instructor'] },
-      _id: id,
-    });
+    return await this.userModel
+      .findOne({
+        roles: { $in: ['Instructor'] },
+        _id: id,
+      })
+      .populate({
+        path: 'centro',
+        populate: {
+          path: 'regional',
+        },
+      })
+      .populate('programas');
+  }
+
+  async asignarprogramas(asignarProgramasDto: AsignarProgramasDto) {
+    const { programa, instructores } = asignarProgramasDto;
+
+    for (const idInstructor of instructores) {
+      const instructor = await this.getInstructorById(idInstructor);
+
+      const instructorTieneElPrograma = instructor.programas.some(
+        (p) => p._id == programa,
+      );
+
+      if (!instructorTieneElPrograma) {
+        await this.userModel.findByIdAndUpdate(idInstructor, {
+          $set: { programas: [...instructor.programas, programa] },
+        });
+      } else {
+        throw new BadRequestException(
+          `El instructor ${instructor.nombre} ${instructor.apellido} ya tiene el programa asignado`,
+        );
+      }
+    }
   }
 }

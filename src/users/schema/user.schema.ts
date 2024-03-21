@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Centro } from 'src/centro/schema/centro.schema';
 import { ContratoDto } from '../dto/contrato.dto';
+import { Programa } from 'src/programa/schema/programa.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -22,10 +23,10 @@ export class User {
   @Prop({ required: true, select: false })
   password: string;
 
- @Prop({ required: true })
+  @Prop({ required: true })
   celular: string;
 
- @Prop({ required: true })
+  @Prop({ required: true })
   contrato: ContratoDto;
 
   @Prop({
@@ -33,7 +34,7 @@ export class User {
       { type: mongoose.Schema.Types.ObjectId, ref: 'Programa', default: null },
     ],
   })
-  programas: string[];
+  programas: any[];
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Centro' })
   centro: Centro;

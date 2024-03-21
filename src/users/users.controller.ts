@@ -12,6 +12,7 @@ import { UserDto } from './dto/user.dto';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ValidateObjectidPipe } from 'src/common/validate-objectid/validate-objectid.pipe';
 import { AdminAuthGuard } from 'src/guard/admin.guard';
+import { AsignarProgramasDto } from './dto/asignarprogramas.dto';
 
 @ApiTags('Usuarios')
 // @UseGuards(AdminAuthGuard)
@@ -26,7 +27,7 @@ export class UsersController {
   })
   @Get('find-one/:name')
   async findOne(@Param('name') name: string) {
-      return await this.usersService.findOne(name);
+    return await this.usersService.findOne(name);
   }
 
   @Get('/instructor')
@@ -42,14 +43,6 @@ export class UsersController {
   @Get('instructor/:id')
   async getInstructorById(@Param('id', ValidateObjectidPipe) id: string) {
     return await this.usersService.getInstructorById(id);
-  }
-
-  @ApiBody({
-    type: UserDto,
-  })
-  @Post('/crear')
-  async crear(@Body(new ValidationPipe({ transform: true })) user: UserDto) {
-    return await this.usersService.crearUser(user);
   }
 
   @Get('roles')
@@ -68,5 +61,21 @@ export class UsersController {
       programa,
       centro,
     );
+  }
+
+  @ApiBody({
+    type: UserDto,
+  })
+  @Post('/crear')
+  async crear(@Body(new ValidationPipe({ transform: true })) user: UserDto) {
+    return await this.usersService.crearUser(user);
+  }
+
+  @Post('/asignarprogramas/instructores')
+  async asignarprogramas(
+    @Body(new ValidationPipe({ transform: true }))
+    asignarProgramasDto: AsignarProgramasDto,
+  ) {
+    return this.usersService.asignarprogramas(asignarProgramasDto);
   }
 }
