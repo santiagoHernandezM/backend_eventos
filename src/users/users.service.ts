@@ -99,6 +99,8 @@ export class UsersService {
   async asignarprogramas(asignarProgramasDto: AsignarProgramasDto) {
     const { programa, instructores } = asignarProgramasDto;
 
+    const invalidos = []
+
     for (const idInstructor of instructores) {
       const instructor = await this.getInstructorById(idInstructor);
 
@@ -108,13 +110,24 @@ export class UsersService {
 
       if (!instructorTieneElPrograma) {
         await this.userModel.findByIdAndUpdate(idInstructor, {
-          $set: { programas: [...instructor.programas, programa] },
+        //  $set: { programas: [...instructor.programas, programa] },
+        $push: { programas: [programa] },
         });
+
+        invalidos.push(
+          {
+            'estado' : '1',
+            'instructor' : `El instructor ${instructor.nombre} ${instructor.apellido} se le asigno el programa`
+          })
+
       } else {
-        throw new BadRequestException(
-          `El instructor ${instructor.nombre} ${instructor.apellido} ya tiene el programa asignado`,
-        );
+        invalidos.push(
+          {
+            'estado' : '2',
+            'instructor' : `El instructor ${instructor.nombre} ${instructor.apellido} ya tiene el programa asignado`
+          })
       }
     }
+    return invalidos;
   }
 }
