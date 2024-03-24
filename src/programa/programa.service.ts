@@ -3,11 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Programa } from './schema/programa.schema';
 import { Model } from 'mongoose';
 import { ActualizarProgramaDto, ProgramaDto } from './dto/programa.dto';
+import { InstructoresPrograma } from './schema/instructoresprograma.schema';
 
 @Injectable()
 export class ProgramaService {
   constructor(
     @InjectModel(Programa.name) private ProgramaModel: Model<Programa>,
+    @InjectModel(InstructoresPrograma.name)
+    private instructoresProgramaModel: Model<InstructoresPrograma>,
   ) {}
 
   /* Todos los metodos de obtener */
@@ -44,6 +47,18 @@ export class ProgramaService {
     });
   }
 
+  async obtenerInstructoresPorPrograma(programa: string) {
+    return await this.instructoresProgramaModel
+      .findOne({ programa })
+      .then((data) => {
+        if (data) {
+          return data;
+        } else {
+          return new NotFoundException('No hay programas con ese id');
+        }
+      });
+  }
+
   /* Todos los metodos de crear */
   async crearPrograma(
     ProgramaDto: ProgramaDto,
@@ -52,14 +67,22 @@ export class ProgramaService {
       codigo: ProgramaDto.codigo,
       intensidad_horaria: ProgramaDto.intensidad_horaria,
     });
+
     existe === null ? (existe = false) : (existe = true);
+
     if (existe) {
       return new NotFoundException(
         `Ya existe un programa con el codigo ${ProgramaDto.codigo}`,
       );
     }
+
     const Programa = new this.ProgramaModel(ProgramaDto);
-    return await Programa.save();
+    const { _id } = await Programa.save();
+
+    await this.instructoresProgramaModel.create({
+      programa: _id,
+      instructores: [],
+    });
   }
 
   /* Todos los metodos de borrar */

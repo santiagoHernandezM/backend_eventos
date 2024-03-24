@@ -38,6 +38,11 @@ export class ProgramaController {
     return await this.Programa.obtenerProgramaPorIntensidad(id, intensidad);
   }
 
+  @Get('/instructoresprograma/:programa')
+  async obtenerInstructoresPorPrograma(@Param('programa') programa: string) {
+    return await this.Programa.obtenerInstructoresPorPrograma(programa);
+  }
+
   @ApiBody({
     type: ProgramaDto,
   })

@@ -4,35 +4,28 @@ import {
   Get,
   Param,
   Post,
-  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UserDto } from './dto/user.dto';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ValidateObjectidPipe } from 'src/common/validate-objectid/validate-objectid.pipe';
-import { AdminAuthGuard } from 'src/guard/admin.guard';
-import { AsignarProgramasDto } from './dto/asignarprogramas.dto';
+import { AsignarProgramaDto } from './dto/asignarprograma.dto';
 
 @ApiTags('Usuarios')
 // @UseGuards(AdminAuthGuard)
-@Controller('user')
+@Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @ApiParam({
-    name: 'name',
+    name: 'nombre',
     description: 'nombre del usuario',
     required: true,
   })
-  @Get('find-one/:name')
-  async findOne(@Param('name') name: string) {
-    return await this.usersService.findOne(name);
-  }
-
-  @Get('/instructor')
-  async getInstructo() {
-    return await this.usersService.getInstructor();
+  @Get('/nombre/:nombre')
+  async findOne(@Param('nombre') nombre: string) {
+    return await this.usersService.findOne(nombre);
   }
 
   @ApiParam({
@@ -40,9 +33,35 @@ export class UsersController {
     description: 'El id de un instructor',
     required: true,
   })
-  @Get('instructor/:id')
+  @Get('/instructor/:id')
   async getInstructorById(@Param('id', ValidateObjectidPipe) id: string) {
-    return await this.usersService.getInstructorById(id);
+    return await this.usersService.obtenerInstructorPorId(id);
+  }
+
+  @Get('/instructor/:id/centro/:centro')
+  async obtenerInstructorPorCentro(
+    @Param('id', ValidateObjectidPipe) id: string,
+    @Param('centro') centro: string,
+  ) {
+    return await this.usersService.obtenerInstructorPorCentro(id, centro);
+  }
+
+  @Get('/instructores')
+  async obtenerInstructores() {
+    return await this.usersService.obtenerInstructores();
+  }
+
+  // @Get('/instructor/:id/centro/:centro')
+  // async obtenerInstructorPorCentro(
+  //   @Param('id') id: string,
+  //   @Param('centro') centro: string,
+  // ) {
+  //   return await this.usersService.obtenerInstructorPorCentro(id, centro);
+  // }
+
+  @Get('/instructores/centro/:centro')
+  async obtenerInstructoresPorCentro(@Param('centro') centro: string) {
+    return await this.usersService.obtenerInstructoresPorCentro(centro);
   }
 
   @Get('roles')
@@ -52,7 +71,7 @@ export class UsersController {
 
   @ApiParam({ name: 'programa', type: String, description: 'Id del programa' })
   @ApiParam({ name: 'centro', type: String, description: 'Id del centro' })
-  @Get('programa/centro/:programa/:centro')
+  @Get('instructores/programa/:programa/centro/:centro')
   async instructorByProgramaByCentro(
     @Param('programa', ValidateObjectidPipe) programa: string,
     @Param('centro', ValidateObjectidPipe) centro: string,
@@ -74,8 +93,8 @@ export class UsersController {
   @Post('/asignarprogramas/instructores')
   async asignarprogramas(
     @Body(new ValidationPipe({ transform: true }))
-    asignarProgramasDto: AsignarProgramasDto,
+    asignarProgramaDto: AsignarProgramaDto,
   ) {
-    return this.usersService.asignarprogramas(asignarProgramasDto);
+    return this.usersService.asignarprograma(asignarProgramaDto);
   }
 }
