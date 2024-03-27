@@ -147,34 +147,81 @@ export class UsersService {
     const resultado = [];
 
     for (const idInstructor of instructores) {
-      const instructor = await this.obtenerInstructorPorId(idInstructor);
+      const instructor = await this.obtenerInstructorPorId(idInstructor.id);
 
       const instructorTieneElPrograma = instructor.programas.some(
         (p) => p._id == programa,
       );
-
+     
+      if (idInstructor.operacion == 1)
+      {
+       
       if (!instructorTieneElPrograma) {
         await this.userModel.updateOne(
-          { _id: idInstructor },
+          { _id: idInstructor.id },
           { $push: { programas: [programa] } },
         );
 
         await this.instructoresProgramaModel.updateOne(
           { programa: programa },
-          { $push: { instructores: idInstructor } },
+          { $push: { instructores: idInstructor.id } },
         );
+      
+
+
 
         resultado.push({
           estado: '1',
-          instructor: `Al instructor ${instructor.nombre} ${instructor.apellido} se le asigno el programa`,
+          title : 'Asignacion exitosa',
+          mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se le asigno el programa`,
         });
-      } else {
+      } 
+    }
+    else{
+      try {
+        
+        const ope = await this.userModel.findOneAndUpdate(
+          { _id: idInstructor.id },
+          { $pull: { programas: programa } },
+          { new: true } // Devuelve el documento actualizado
+        );
+
+        const pro = await this.instructoresProgramaModel.findOneAndUpdate(
+          { programa: programa },
+          { $pull: { instructores: idInstructor.id } },
+          { new: true } // Devuelve el documento actualizado
+        );
+  
+        if (!ope) {
+          resultado.push({
+            estado: '2',
+            title : 'Eliminar programa',
+            mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se producejo un error al remover el programa`,
+          });
+        }
+        else
+         {
+          resultado.push({
+            estado: '2',
+            title : 'Eliminar programa',
+            mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se elimino el programa : ${programa}`,
+          });
+
+         }
+
+      } catch (error) {
+        console.error('Error :', error);
+        throw error;
+    }
+      
+     /* else {
         resultado.push({
           estado: '2',
           instructor: `El instructor ${instructor.nombre} ${instructor.apellido} ya tiene el programa asignado`,
         });
-      }
+      }*/
     }
+  }
     return resultado;
   }
 }

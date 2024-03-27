@@ -1,4 +1,5 @@
 import { ArrayNotEmpty, IsMongoId, IsNotEmpty } from 'class-validator';
+import { InstructorDto } from './instructor.dto';
 
 export class AsignarProgramaDto {
   @IsNotEmpty()
@@ -7,5 +8,5 @@ export class AsignarProgramaDto {
 
   @IsNotEmpty()
   @ArrayNotEmpty({ each: false })
-  instructores: string[];
+  instructores: InstructorDto[];
 }
