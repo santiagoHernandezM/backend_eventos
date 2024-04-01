@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { AsignarProgramaDto } from './dto/asignarprograma.dto';
 import { ProgramaService } from 'src/programa/programa.service';
 import { InstructoresPrograma } from 'src/programa/schema/instructoresprograma.schema';
+import { programaDto } from '../evento/dto/programa.dto';
 
 @Injectable()
 export class UsersService {
@@ -145,6 +146,10 @@ export class UsersService {
     const { programa, instructores } = asignarProgramaDto;
 
     const resultado = [];
+    var prog = Object();
+    prog.nombre = null;
+    prog = await this.programaService.obtenerProgramaId(programa)
+
 
     for (const idInstructor of instructores) {
       const instructor = await this.obtenerInstructorPorId(idInstructor.id);
@@ -173,7 +178,7 @@ export class UsersService {
         resultado.push({
           estado: '1',
           title : 'Asignacion exitosa',
-          mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se le asigno el programa`,
+          mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se le asigno el programa : ${prog.nombre}`,
         });
       } 
     }
@@ -196,7 +201,7 @@ export class UsersService {
           resultado.push({
             estado: '2',
             title : 'Eliminar programa',
-            mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se producejo un error al remover el programa`,
+            mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se producejo un error al remover el programa : ${prog.nombre}`,
           });
         }
         else
@@ -204,7 +209,7 @@ export class UsersService {
           resultado.push({
             estado: '2',
             title : 'Eliminar programa',
-            mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se elimino el programa : ${programa}`,
+            mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se elimino el programa : ${prog.nombre}`,
           });
 
          }
