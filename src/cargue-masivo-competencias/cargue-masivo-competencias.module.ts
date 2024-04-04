@@ -7,12 +7,14 @@ import {
   CompetenciaSchema,
 } from 'src/competencia/schema/competencia.schema';
 import { User, UserSchema } from 'src/users/schema/user.schema';
+import { Programa, ProgramaSchema } from 'src/programa/schema/programa.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Competencia.name, schema: CompetenciaSchema },
       { name: User.name, schema: UserSchema },
+      { name: Programa.name, schema: ProgramaSchema },
     ]),
   ],
   controllers: [CargueMasivoCompetenciasController],

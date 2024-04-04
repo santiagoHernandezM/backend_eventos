@@ -7,12 +7,15 @@ import { Competencia } from '../competencia/schema/competencia.schema';
 import { Model } from 'mongoose';
 import { UserDto } from 'src/users/dto/user.dto';
 import { User } from 'src/users/schema/user.schema';
+import { ProgramaDto } from 'src/programa/dto/programa.dto';
+import { Programa } from 'src/programa/schema/programa.schema';
 
 @Injectable()
 export class CargueMasivoCompetenciasService {
   constructor(
     @InjectModel(Competencia.name) private competenciaModel: Model<Competencia>,
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Programa.name) private programaModel: Model<Programa>,
 
   ) {}
 
@@ -58,6 +61,34 @@ export class CargueMasivoCompetenciasService {
     fs.unlinkSync(file.path);
     this.crearCompetencia(obj);
     return 'ok';
+  }
+
+  async processProgramas(
+    file: Express.Multer.File
+  ): Promise<string>{
+    const excelJson = await excelToJson({
+      sourceFile: file.path,
+    });
+    const hojasExcel = Object.keys(excelJson);
+
+    for await (const hoja of hojasExcel) {
+      //Recorremos las filas de la hoja
+      for await (const columna of excelJson[hoja]) {
+        const paquete  = {
+          codigo: columna['A'], //Código de la competencia en la Columna A del excel
+          nombre: columna['B'], //Nombre de la competencia en la Columna B del excel
+          nivel: columna['C'],
+          version: columna['D'],
+          duracion: columna['E'],
+          intensidad_horaria : columna['F'],
+    
+         }
+         this.crearPrograma(paquete)
+      }  
+      
+    }
+    fs.unlinkSync(file.path);
+     return 'ok'
   }
 
   async processInstructor(
@@ -119,5 +150,10 @@ export class CargueMasivoCompetenciasService {
   async crearInstructor(instructor: UserDto): Promise<User> {
     const newUser = new this.userModel(instructor);
     return await newUser.save();
+  }
+
+  async crearPrograma(programa: ProgramaDto): Promise<Programa> {
+    const newPrograma = new this.programaModel(programa);
+    return await newPrograma.save();
   }
 }

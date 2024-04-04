@@ -70,8 +70,34 @@ export class CargueMasivoCompetenciasController {
     @UploadedFile() file: Express.Multer.File,
     @Body('centro') centro: string,
       ): Promise<string> {
-     
-    const result = await this.cargue.processInstructor(file,centro);
+     const result = await this.cargue.processInstructor(file,centro);
+    return result;
+   
+  }
+
+  @Post('cargarprogramas')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(
+            null,
+            `${file.fieldname}-${uniqueSuffix}.${
+              file.originalname.split('.')[1]
+            }`,
+          );
+        },
+      }),
+    }),
+  )
+  async uploadFileProgramas(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('centro') centro: string,
+      ): Promise<string> {
+     const result = await this.cargue.processProgramas(file);
     return result;
    
   }
