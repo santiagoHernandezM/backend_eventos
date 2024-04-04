@@ -5,17 +5,18 @@ import { competenciaDto } from '../competencia/dto/competencia.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Competencia } from '../competencia/schema/competencia.schema';
 import { Model } from 'mongoose';
-import { UserDto } from 'src/users/dto/user.dto';
-import { User } from 'src/users/schema/user.schema';
 import { ProgramaDto } from 'src/programa/dto/programa.dto';
 import { Programa } from 'src/programa/schema/programa.schema';
+import * as bcrypt from 'bcrypt';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class CargueMasivoCompetenciasService {
   constructor(
     @InjectModel(Competencia.name) private competenciaModel: Model<Competencia>,
-    @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(Programa.name) private programaModel: Model<Programa>,
+       @InjectModel(Programa.name) private programaModel: Model<Programa>,
+    
+        private readonly usersService: UsersService
 
   ) {}
 
@@ -107,9 +108,9 @@ export class CargueMasivoCompetenciasService {
       for await (const columna of excelJson[hoja]) {
         const instructor = {
           documento: columna['A'], //Código de la competencia en la Columna A del excel
-          nombre: columna['B'], //Nombre de la competencia en la Columna B del excel
-          apellido: columna['C'],
-          correo: columna['D'],
+          nombre: columna['B'], //Nombre de la competencia en la Co password: 
+          apellido : columna['C'],
+          correo : columna['D'],
           celular: columna['E'],
           password : columna['A'],
           centro : centro,
@@ -131,8 +132,8 @@ export class CargueMasivoCompetenciasService {
           } else break;
         }*/
         
-      console.log(JSON.stringify(instructor))
-        this.crearInstructor(instructor);
+       this.usersService.crearUser(instructor)
+       // this.crearInstructor(instructor);
 
       }
     }
@@ -147,10 +148,7 @@ export class CargueMasivoCompetenciasService {
     return await newCompetencia.save();
   }
 
-  async crearInstructor(instructor: UserDto): Promise<User> {
-    const newUser = new this.userModel(instructor);
-    return await newUser.save();
-  }
+
 
   async crearPrograma(programa: ProgramaDto): Promise<Programa> {
     const newPrograma = new this.programaModel(programa);

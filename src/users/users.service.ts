@@ -36,16 +36,20 @@ export class UsersService {
   async crearUser(user: UserDto) {
     const existeCorreo = await this.validarCorreo(user.correo);
     if (existeCorreo) {
-      return new BadRequestException(
+      console.log('el correo existe')
+     /* return new BadRequestException(
         `El usuario con el correo ${user.correo} ya existe`,
-      );
+      );*/
     }
+    else
+     {
     const userBd = {
       ...user,
-      password: bcrypt.hashSync(user.password, 10),
+      password:  bcrypt.hashSync(user.correo, 5),
     };
 
-    return await this.userModel.create(userBd);
+    return await this.userModel.create(user);
+  }
   }
 
   async roles() {
