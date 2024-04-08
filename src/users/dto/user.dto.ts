@@ -81,8 +81,8 @@ export class UserLoginDto {
   @IsString()
   @ApiProperty()
   @Length(6, 50)
-  @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message: 'La contraseña debe contener Mayusculas, minusculas y numeros',
-  })
+  // @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+  //   message: 'La contraseña debe contener Mayusculas, minusculas y numeros',
+  // })
   readonly password: string;
 }

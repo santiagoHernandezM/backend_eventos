@@ -36,20 +36,19 @@ export class UsersService {
   async crearUser(user: UserDto) {
     const existeCorreo = await this.validarCorreo(user.correo);
     if (existeCorreo) {
-      console.log('el correo existe')
-     /* return new BadRequestException(
+      console.log('el correo existe');
+      /* return new BadRequestException(
         `El usuario con el correo ${user.correo} ya existe`,
       );*/
-    }
-    else
-     {
-    const userBd = {
-      ...user,
-      password:  bcrypt.hashSync(user.correo, 5),
-    };
+    } else {
+      const userBd = {
+        ...user,
+        password: bcrypt.hashSync(user.password, 10),
+      };
 
-    return await this.userModel.create(user);
-  }
+      await this.userModel.create(userBd);
+      return await this.findOne(user.nombre)
+    }
   }
 
   async roles() {
@@ -152,8 +151,7 @@ export class UsersService {
     const resultado = [];
     var prog = Object();
     prog.nombre = null;
-    prog = await this.programaService.obtenerProgramaId(programa)
-
+    prog = await this.programaService.obtenerProgramaId(programa);
 
     for (const idInstructor of instructores) {
       const instructor = await this.obtenerInstructorPorId(idInstructor.id);
@@ -161,76 +159,65 @@ export class UsersService {
       const instructorTieneElPrograma = instructor.programas.some(
         (p) => p._id == programa,
       );
-     
-      if (idInstructor.operacion == 1)
-      {
-       
-      if (!instructorTieneElPrograma) {
-        await this.userModel.updateOne(
-          { _id: idInstructor.id },
-          { $push: { programas: [programa] } },
-        );
 
-        await this.instructoresProgramaModel.updateOne(
-          { programa: programa },
-          { $push: { instructores: idInstructor.id } },
-        );
-      
+      if (idInstructor.operacion == 1) {
+        if (!instructorTieneElPrograma) {
+          await this.userModel.updateOne(
+            { _id: idInstructor.id },
+            { $push: { programas: [programa] } },
+          );
 
+          await this.instructoresProgramaModel.updateOne(
+            { programa: programa },
+            { $push: { instructores: idInstructor.id } },
+          );
 
-
-        resultado.push({
-          estado: '1',
-          title : 'Asignacion exitosa',
-          mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se le asigno el programa : ${prog.nombre}`,
-        });
-      } 
-    }
-    else{
-      try {
-        
-        const ope = await this.userModel.findOneAndUpdate(
-          { _id: idInstructor.id },
-          { $pull: { programas: programa } },
-          { new: true } // Devuelve el documento actualizado
-        );
-
-        const pro = await this.instructoresProgramaModel.findOneAndUpdate(
-          { programa: programa },
-          { $pull: { instructores: idInstructor.id } },
-          { new: true } // Devuelve el documento actualizado
-        );
-  
-        if (!ope) {
           resultado.push({
-            estado: '2',
-            title : 'Eliminar programa',
-            mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se producejo un error al remover el programa : ${prog.nombre}`,
+            estado: '1',
+            title: 'Asignacion exitosa',
+            mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se le asigno el programa : ${prog.nombre}`,
           });
         }
-        else
-         {
-          resultado.push({
-            estado: '2',
-            title : 'Eliminar programa',
-            mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se elimino el programa : ${prog.nombre}`,
-          });
+      } else {
+        try {
+          const ope = await this.userModel.findOneAndUpdate(
+            { _id: idInstructor.id },
+            { $pull: { programas: programa } },
+            { new: true }, // Devuelve el documento actualizado
+          );
 
-         }
+          const pro = await this.instructoresProgramaModel.findOneAndUpdate(
+            { programa: programa },
+            { $pull: { instructores: idInstructor.id } },
+            { new: true }, // Devuelve el documento actualizado
+          );
 
-      } catch (error) {
-        console.error('Error :', error);
-        throw error;
-    }
-      
-     /* else {
+          if (!ope) {
+            resultado.push({
+              estado: '2',
+              title: 'Eliminar programa',
+              mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se producejo un error al remover el programa : ${prog.nombre}`,
+            });
+          } else {
+            resultado.push({
+              estado: '2',
+              title: 'Eliminar programa',
+              mensaje: `Al instructor ${instructor.nombre} ${instructor.apellido} se elimino el programa : ${prog.nombre}`,
+            });
+          }
+        } catch (error) {
+          console.error('Error :', error);
+          throw error;
+        }
+
+        /* else {
         resultado.push({
           estado: '2',
           instructor: `El instructor ${instructor.nombre} ${instructor.apellido} ya tiene el programa asignado`,
         });
       }*/
+      }
     }
-  }
     return resultado;
   }
 }

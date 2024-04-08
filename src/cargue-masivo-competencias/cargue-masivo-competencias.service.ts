@@ -14,10 +14,9 @@ import { UsersService } from 'src/users/users.service';
 export class CargueMasivoCompetenciasService {
   constructor(
     @InjectModel(Competencia.name) private competenciaModel: Model<Competencia>,
-       @InjectModel(Programa.name) private programaModel: Model<Programa>,
-    
-        private readonly usersService: UsersService
+    @InjectModel(Programa.name) private programaModel: Model<Programa>,
 
+    private readonly usersService: UsersService,
   ) {}
 
   async processCsv(
@@ -64,9 +63,7 @@ export class CargueMasivoCompetenciasService {
     return 'ok';
   }
 
-  async processProgramas(
-    file: Express.Multer.File
-  ): Promise<string>{
+  async processProgramas(file: Express.Multer.File): Promise<string> {
     const excelJson = await excelToJson({
       sourceFile: file.path,
     });
@@ -75,80 +72,77 @@ export class CargueMasivoCompetenciasService {
     for await (const hoja of hojasExcel) {
       //Recorremos las filas de la hoja
       for await (const columna of excelJson[hoja]) {
-        const paquete  = {
+        const paquete = {
           codigo: columna['A'], //Código de la competencia en la Columna A del excel
           nombre: columna['B'], //Nombre de la competencia en la Columna B del excel
           nivel: columna['C'],
           version: columna['D'],
           duracion: columna['E'],
-          intensidad_horaria : columna['F'],
-    
-         }
-         this.crearPrograma(paquete)
-      }  
-      
-    }
-    fs.unlinkSync(file.path);
-     return 'ok'
-  }
-
-  async processInstructor(
-    file: Express.Multer.File,
-    centro: string
-   
-  ): Promise<string> {
-    const excelJson = await excelToJson({
-      sourceFile: file.path,
-    });
-    const hojasExcel = Object.keys(excelJson); //Obtener keys de las hojas del excel
-
-     //Recorremos hoja por hoja el excel
-    for await (const hoja of hojasExcel) {
-      //Recorremos las filas de la hoja
-      for await (const columna of excelJson[hoja]) {
-        const instructor = {
-          documento: columna['A'], //Código de la competencia en la Columna A del excel
-          nombre: columna['B'], //Nombre de la competencia en la Co password: 
-          apellido : columna['C'],
-          correo : columna['D'],
-          celular: columna['E'],
-          password : columna['A'],
-          centro : centro,
-          contrato : {
-            numero : columna['F'],
-            fechaInicio : columna['G'],
-            fechaTerminacion : columna['H'],
-            tipoVinculacion : columna['I'],
-          },
-          roles : ['Instructor'],
-          programas: [],
+          intensidad_horaria: columna['F'],
         };
-
-        //Key de la competencia(Fila del excel)
-       /* const columnas = Object.keys(columna);
-        for (let x = 9; x < columnas.length; x++) {
-          if (columna[columnas[x]] != '') {
-             instructor.programas.push(columna[columnas[x]]);
-          } else break;
-        }*/
-        
-       this.usersService.crearUser(instructor)
-       // this.crearInstructor(instructor);
-
+        this.crearPrograma(paquete);
       }
     }
     fs.unlinkSync(file.path);
     return 'ok';
   }
 
+  async processInstructor(
+    file: Express.Multer.File,
+    centro: string,
+  ): Promise<any> {
+    const excelJson = await excelToJson({
+      sourceFile: file.path,
+    });
+    const hojasExcel = Object.keys(excelJson); //Obtener keys de las hojas del excel
+    const nuevosInstructores: any[] = []
 
+    //Recorremos hoja por hoja el excel
+    for await (const hoja of hojasExcel) {
+      //Recorremos las filas de la hoja
+      for await (const columna of excelJson[hoja]) {
+        const instructor = {
+          documento: columna['A'], //Código de la competencia en la Columna A del excel
+          nombre: columna['B'], //Nombre de la competencia en la Co password:
+          apellido: columna['C'],
+          correo: columna['D'],
+          celular: columna['E'],
+          password: columna['A'].toString(),
+          centro: centro,
+          contrato: {
+            numero: columna['F'],
+            fechaInicio: columna['G'],
+            fechaTerminacion: columna['H'],
+            tipoVinculacion: columna['I'],
+          },
+          roles: ['Instructor'],
+          programas: [],
+        };
+
+        //Key de la competencia(Fila del excel)
+        /* const columnas = Object.keys(columna);
+        for (let x = 9; x < columnas.length; x++) {
+          if (columna[columnas[x]] != '') {
+             instructor.programas.push(columna[columnas[x]]);
+          } else break;
+        }*/
+
+        const nuevoInstructor = await this.usersService.crearUser(instructor);
+        if (nuevoInstructor) {
+            nuevosInstructores.push(nuevoInstructor)    
+        }
+        
+        // this.crearInstructor(instructor);
+      }
+    }
+    fs.unlinkSync(file.path);
+    return nuevosInstructores;
+  }
 
   async crearCompetencia(competencia: competenciaDto): Promise<Competencia> {
     const newCompetencia = new this.competenciaModel(competencia);
     return await newCompetencia.save();
   }
-
-
 
   async crearPrograma(programa: ProgramaDto): Promise<Programa> {
     const newPrograma = new this.programaModel(programa);
