@@ -37,9 +37,9 @@ export class UsersService {
     const existeCorreo = await this.validarCorreo(user.correo);
     if (existeCorreo) {
       console.log('el correo existe');
-      /* return new BadRequestException(
-        `El usuario con el correo ${user.correo} ya existe`,
-      );*/
+      const usuarioExistente = await this.findOne(user.nombre)
+      return { ...usuarioExistente, nuevo: false }
+
     } else {
       const userBd = {
         ...user,
@@ -47,7 +47,8 @@ export class UsersService {
       };
 
       await this.userModel.create(userBd);
-      return await this.findOne(user.nombre)
+      const usuario = await this.findOne(user.nombre)
+      return { ...usuario, nuevo: true }
     }
   }
 

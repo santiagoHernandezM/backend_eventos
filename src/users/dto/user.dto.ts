@@ -42,8 +42,8 @@ export class UserDto {
   readonly celular: string;
 
   @ApiProperty()
-  @IsNotEmpty()
-  readonly contrato: ContratoDto;
+  @IsOptional()
+  readonly contrato?: ContratoDto;
 
   @ApiProperty()
   @IsOptional()
