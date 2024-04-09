@@ -37,8 +37,7 @@ export class UsersService {
     const existeCorreo = await this.validarCorreo(user.correo);
     if (existeCorreo) {
       console.log('el correo existe');
-      const usuarioExistente = await this.findOne(user.nombre)
-      return { ...usuarioExistente, nuevo: false }
+      return { ...user, registrado: "No" }
 
     } else {
       const userBd = {
@@ -47,8 +46,7 @@ export class UsersService {
       };
 
       await this.userModel.create(userBd);
-      const usuario = await this.findOne(user.nombre)
-      return { ...usuario, nuevo: true }
+      return { ...user, registrado: "Si" }
     }
   }
 

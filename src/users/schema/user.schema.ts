@@ -26,7 +26,7 @@ export class User {
   @Prop({ required: true })
   celular: string;
 
-  @Prop({ required: false })
+  @Prop({ required: false, default: 'No especificado' })
   contrato?: ContratoDto;
 
   @Prop({
