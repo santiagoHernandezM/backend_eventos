@@ -24,6 +24,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import configuration from './config/configuration';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -38,6 +39,19 @@ import configuration from './config/configuration';
       }),
       inject: [ConfigService],
     }),
+
+    MailerModule.forRoot({
+      transport: {
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true, // true para usar SSL/TLS
+        auth: {
+          user: 'senaeventos2024@gmail.com', // tu dirección de correo electrónico de Gmail
+          pass: 'rfosvfegxxaweodr', // tu contraseña de Gmail o una contraseña de aplicación generada
+        },
+      },
+    }),
+
     CentroModule,
     SedesModule,
     RegionalModule,
