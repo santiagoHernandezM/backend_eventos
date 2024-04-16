@@ -1,13 +1,15 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
+  Put,
   ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { UserDto } from './dto/user.dto';
+import { ActualizarUserDto, UserDto } from './dto/user.dto';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ValidateObjectidPipe } from 'src/common/validate-objectid/validate-objectid.pipe';
 import { AsignarProgramaDto } from './dto/asignarprograma.dto';
@@ -44,6 +46,11 @@ export class UsersController {
     @Param('centro') centro: string,
   ) {
     return await this.usersService.obtenerInstructorPorCentro(id, centro);
+  }
+
+  @Get()
+  async obtenerTodo() {
+    return await this.usersService.obtenerTodo();
   }
 
   @Get('/instructores')
@@ -96,5 +103,15 @@ export class UsersController {
     asignarProgramaDto: AsignarProgramaDto,
   ) {
     return this.usersService.asignarprograma(asignarProgramaDto);
+  }
+
+  @Put('actualizar')
+  async actualizarUsuario(@Body() User: ActualizarUserDto) {
+    return await this.usersService.actualizarUsuario(User);
+  }
+
+  @Delete('eliminar/:id')
+  eliminarUsuario(@Param('id') id: string){
+    return this.usersService.eliminarUsuario(id)
   }
 }
