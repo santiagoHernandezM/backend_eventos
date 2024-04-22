@@ -13,47 +13,48 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ContratoDto } from './contrato.dto';
 
 export class UserDto {
+  
   @ApiProperty()
   @Matches(/^(?!\s*$).+/, { message: 'El documento no puede ser estar vacío' })
-  readonly documento: string;
+   documento: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @Matches(/^(?!\s*$).+/, { message: 'El nombre no puede ser estar vacío' })
-  readonly nombre: string;
+   nombre: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @Matches(/^(?!\s*$).+/, { message: 'El apellido no puede ser estar vacío' })
-  readonly apellido: string;
+   apellido: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsEmail()
   @IsString()
   @Matches(/^(?!\s*$).+/, { message: 'El correo no puede ser estar vacío' })
-  readonly correo: string;
+   correo: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @Matches(/^(?!\s*$).+/, { message: 'El celular no puede ser estar vacío' })
-  readonly celular: string;
+   celular: string;
 
   @ApiProperty()
   @IsOptional()
-  readonly contrato?: ContratoDto;
+   contrato?: ContratoDto;
 
   @ApiProperty()
   @IsOptional()
   @IsArray()
-  readonly programas: string[];
+   programas: string[];
 
   @ApiProperty()
   @Matches(/^(?!\s*$).+/, { message: 'El centro no puede estar vacía' })
-  readonly centro: string;
+   centro: string;
 
   @IsNotEmpty()
   @IsString()
@@ -62,12 +63,12 @@ export class UserDto {
   @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message: 'La contraseña debe contener Mayusculas, minusculas y numeros',
   })
-  readonly password: string;
+   password: string;
 
   @IsArray()
   @ApiProperty()
   @ArrayNotEmpty({ each: false })
-  readonly roles: string[];
+   roles: string[];
 }
 
 export class UserLoginDto {
