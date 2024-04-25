@@ -6,9 +6,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Competencia } from '../competencia/schema/competencia.schema';
 import { Model } from 'mongoose';
 import { ProgramaDto } from 'src/programa/dto/programa.dto';
+import { UserDto } from 'src/users/dto/user.dto';
+import { ContratoDto } from 'src/users/dto/contrato.dto';
 import { Programa } from 'src/programa/schema/programa.schema';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from 'src/users/users.service';
+import * as moment from 'moment';
 
 @Injectable()
 export class CargueMasivoCompetenciasService {
@@ -101,6 +104,16 @@ export class CargueMasivoCompetenciasService {
     for await (const hoja of hojasExcel) {
       //Recorremos las filas de la hoja
       for await (const columna of excelJson[hoja]) {
+        
+       const f1 = columna['G']
+       const f2 = columna['H']
+       const tf1 = JSON.stringify(f1).split('T')
+       const fe1 = tf1[0].substring(1, tf1[0].length);
+       const tf2 = JSON.stringify(f2).split('T')
+       const fe2 = tf2[0].substring(1, tf1[0].length);
+
+        const date = moment(f1, 'YYYY-MM-DD').format('YYYY/MM/DD');
+       
         const instructor = {
           documento: columna['A'], //Código de la competencia en la Columna A del excel
           nombre: columna['B'], //Nombre de la competencia en la Co password:
@@ -111,28 +124,21 @@ export class CargueMasivoCompetenciasService {
           centro: centro,
           contrato: {
             numero: columna['F'],
-            fechaInicio: columna['G'],
-            fechaTerminacion: columna['H'],
+            fechaInicio: fe1,
+            fechaTerminacion:fe2,
             tipoVinculacion: columna['I'],
           },
           roles: ['Instructor'],
           programas: [],
         };
 
-        //Key de la competencia(Fila del excel)
-        /* const columnas = Object.keys(columna);
-        for (let x = 9; x < columnas.length; x++) {
-          if (columna[columnas[x]] != '') {
-             instructor.programas.push(columna[columnas[x]]);
-          } else break;
-        }*/
-
+       
         const nuevoInstructor = await this.usersService.crearUser(instructor);
         if (nuevoInstructor) {
             nuevosInstructores.push(nuevoInstructor)    
         }
         
-        // this.crearInstructor(instructor);
+        
       }
     }
     fs.unlinkSync(file.path);

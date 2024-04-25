@@ -5,6 +5,7 @@ import {
   Matches,
   IsNumber,
   IsMongoId,
+  IsDate,
 } from 'class-validator';
 
 export class ContratoDto {
@@ -14,23 +15,23 @@ export class ContratoDto {
   @Matches(/^(?!\s*$).+/, {
     message: 'El campo numero no debe estar vacio',
   })
-  readonly numero: string;
+   numero: string;
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
+  @IsDate()
   @Matches(/^(?!\s*$).+/, {
     message: 'El campo fecha de inicio no debe estar vacio',
   })
-  readonly fechaInicio: Date;
+   fechaInicio:any;
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
+  @IsDate()
   @Matches(/^(?!\s*$).+/, {
     message: 'El campo fecha de inicio no debe estar vacio',
   })
-  readonly fechaTerminacion: Date;
+   fechaTerminacion: any;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -39,5 +40,5 @@ export class ContratoDto {
   @Matches(/^(?!\s*$).+/, {
     message: 'El campo fecha de inicio no debe estar vacio',
   })
-  readonly tipoVinculacion: string;
+   tipoVinculacion: string;
 }
