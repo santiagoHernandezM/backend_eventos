@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   Post,
   Put,
@@ -13,6 +14,9 @@ import { ActualizarUserDto, UserDto } from './dto/user.dto';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ValidateObjectidPipe } from 'src/common/validate-objectid/validate-objectid.pipe';
 import { AsignarProgramaDto } from './dto/asignarprograma.dto';
+import { CreateEmailDto } from 'src/email/dto/create-email.dto';
+import { NewPasswordDto } from './dto/new-password.dto';
+import { IncomingHttpHeaders } from 'http';
 
 @ApiTags('Usuarios')
 // @UseGuards(AdminAuthGuard)
@@ -105,13 +109,26 @@ export class UsersController {
     return this.usersService.asignarprograma(asignarProgramaDto);
   }
 
+  @Post('/forgot-password')
+  forgotPassword(@Body() createEmailDto: CreateEmailDto) {
+    return this.usersService.forgotPassword(createEmailDto);
+  }
+
+  @Post('/reset-password')
+  resetPassword(
+    @Body() newPasswordDto: NewPasswordDto,
+    @Headers() headers: IncomingHttpHeaders,
+  ) {
+    return this.usersService.resetPassword(newPasswordDto, headers);
+  }
+
   @Put('actualizar')
   async actualizarUsuario(@Body() User: ActualizarUserDto) {
     return await this.usersService.actualizarUsuario(User);
   }
 
   @Delete('eliminar/:id')
-  eliminarUsuario(@Param('id') id: string){
-    return this.usersService.eliminarUsuario(id)
+  eliminarUsuario(@Param('id') id: string) {
+    return this.usersService.eliminarUsuario(id);
   }
 }

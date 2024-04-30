@@ -11,7 +11,7 @@ import {
 import { BloqueService } from './bloque.service';
 import { CrearBloqueDto, ActualizarBloqueDto } from './dto/bloque.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { InstructorAuthGuard } from 'src/guard/instructor.guard';
+import { InstructorAuthGuard } from 'src/auth/guards/instructor.guard';
 
 // @UseGuards(InstructorAuthGuard)
 @ApiTags('Bloque')

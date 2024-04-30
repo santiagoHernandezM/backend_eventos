@@ -1,7 +1,7 @@
-import { IsEmail, IsString, isEmail } from "class-validator";
+import { IsEmail, IsString, isEmail } from 'class-validator';
 
 export class CreateEmailDto {
-    @IsString()
-    @IsEmail()
-    destinatario: string
+  @IsString()
+  @IsEmail()
+  email: string;
 }

@@ -13,7 +13,7 @@ import { ActualizarRegionalDto, RegionalDto } from './dto/regional.dto';
 import { RegionalService } from './regional.service';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ValidateObjectidPipe } from 'src/common/validate-objectid/validate-objectid.pipe';
-import { AdminAuthGuard } from 'src/guard/admin.guard';
+import { AdminAuthGuard } from 'src/auth/guards/admin.guard';
 
 @ApiTags('Regional')
 // @UseGuards(AdminAuthGuard)

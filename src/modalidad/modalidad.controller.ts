@@ -11,7 +11,7 @@ import {
 import { ModalidadService } from './modalidad.service';
 import { ActualizarModalidadDto, ModalidadDto } from './dto/modalidad.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { AdminAuthGuard } from 'src/guard/admin.guard';
+import { AdminAuthGuard } from 'src/auth/guards/admin.guard';
 
 @ApiTags('Modalidad')
 @UseGuards(AdminAuthGuard)

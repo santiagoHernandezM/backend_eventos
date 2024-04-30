@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,6 +13,11 @@ import { AsignarProgramaDto } from './dto/asignarprograma.dto';
 import { ProgramaService } from 'src/programa/programa.service';
 import { InstructoresPrograma } from 'src/programa/schema/instructoresprograma.schema';
 import { programaDto } from '../evento/dto/programa.dto';
+import { CreateEmailDto } from 'src/email/dto/create-email.dto';
+import { EmailService } from 'src/email/email.service';
+import { JwtService } from '@nestjs/jwt';
+import { IncomingHttpHeaders } from 'http';
+import { NewPasswordDto } from './dto/new-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +26,8 @@ export class UsersService {
     @InjectModel(InstructoresPrograma.name)
     private instructoresProgramaModel: Model<InstructoresPrograma>,
     private readonly programaService: ProgramaService,
+    private readonly emailService: EmailService,
+    @Inject(JwtService) private jwtService: JwtService,
   ) {}
 
   async obtenerTodo(): Promise<NotFoundException | User[]> {
@@ -49,8 +57,7 @@ export class UsersService {
     const existeCorreo = await this.validarCorreo(user.correo);
     if (existeCorreo) {
       console.log('el correo existe');
-      return { ...user, registrado: "No" }
-
+      return { ...user, registrado: 'No' };
     } else {
       const userBd = {
         ...user,
@@ -58,7 +65,7 @@ export class UsersService {
       };
 
       await this.userModel.create(userBd);
-      return { ...user, registrado: "Si" }
+      return { ...user, registrado: 'Si' };
     }
   }
 
@@ -103,16 +110,15 @@ export class UsersService {
 
   /* Todos los metodos de actualizar */
   async actualizarUsuario(usuario: ActualizarUserDto) {
-    return await this.userModel.findByIdAndUpdate(
-      usuario.id,
-      usuario,
-    ).then((data) => {
-      return data
-        ? usuario
-        : new NotFoundException(
-            `No se encontro el usuario con id:${usuario.id}`,
-          );
-    });
+    return await this.userModel
+      .findByIdAndUpdate(usuario.id, usuario)
+      .then((data) => {
+        return data
+          ? usuario
+          : new NotFoundException(
+              `No se encontro el usuario con id:${usuario.id}`,
+            );
+      });
   }
 
   async obtenerInstructoresPorCentro(centro: string) {
@@ -256,5 +262,58 @@ export class UsersService {
         );
       }
     });
+  }
+
+  async forgotPassword(createEmailDto: CreateEmailDto) {
+    const { email } = createEmailDto;
+    const usuario = await this.userModel.findOne({ correo: email });
+
+    if (!usuario) {
+      throw new NotFoundException(
+        `Usuario con correo "${email}" no encontrado`,
+      );
+    }
+
+    const payload = {
+      sub: usuario.id,
+      correo: usuario.correo,
+      rol: usuario.roles,
+    };
+
+    const token = await this.jwtService.signAsync(payload);
+
+    const response = await this.emailService.enviarCorreo({ email }, token);
+
+    console.log({ token });
+
+    return response;
+  }
+
+  async resetPassword(
+    newPasswordDto: NewPasswordDto,
+    headers: IncomingHttpHeaders,
+  ) {
+    let { authorization } = headers;
+
+    if (authorization.startsWith('Bearer')) {
+      authorization = authorization.split(' ')[1];
+    }
+
+    try {
+      const payload = this.jwtService.verify(authorization);
+      const { sub } = payload;
+
+      const newPassword = bcrypt.hashSync(newPasswordDto.newPassword, 10);
+
+      await this.userModel.findByIdAndUpdate(sub, {
+        $set: { password: newPassword },
+      });
+    } catch (error) {
+      if (error.name == 'JsonWebTokenError') {
+        console.log('Token inválido');
+        return;
+      }
+      console.log(error);
+    }
   }
 }

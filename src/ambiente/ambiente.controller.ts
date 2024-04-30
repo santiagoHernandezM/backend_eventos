@@ -11,10 +11,10 @@ import {
 import { AmbienteService } from './ambiente.service';
 import { CreatedAmbienteDTO, UpdateAmbienteDTO } from './dto/ambiente.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { AdminAuthGuard } from 'src/guard/admin.guard';
+import { AdminAuthGuard } from 'src/auth/guards/admin.guard';
 
 @ApiTags('Ambiente')
-// @UseGuards(AdminAuthGuard)
+@UseGuards(AdminAuthGuard)
 @Controller('ambiente')
 export class AmbienteController {
   constructor(private readonly ambienteService: AmbienteService) {}

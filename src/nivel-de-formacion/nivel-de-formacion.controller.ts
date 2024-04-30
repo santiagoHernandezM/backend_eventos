@@ -14,7 +14,7 @@ import {
   ActualizarNivelDeFormacionDto,
 } from './dto/nivel-de-formacion.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { AdminAuthGuard } from 'src/guard/admin.guard';
+import { AdminAuthGuard } from 'src/auth/guards/admin.guard';
 
 @ApiTags('Nivel de formación')
 @UseGuards(AdminAuthGuard)
