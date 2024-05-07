@@ -24,6 +24,11 @@ export class ProgramaController {
     return await this.Programa.obtenerTodo();
   }
 
+  @Get('programacompetencia')
+  async obtenerprogramacompetencia() {
+    return await this.Programa.programacompetencia();
+  }
+
   @ApiParam({ name: 'id', type: String, description: 'El id de un programa' })
   @Get('/:id')
   async obtenerPrograma(@Param('id') id: string) {

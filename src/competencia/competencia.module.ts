@@ -10,7 +10,7 @@ import { ProgramaModule } from 'src/programa/programa.module';
     MongooseModule.forFeature([
       { name: Competencia.name, schema: CompetenciaSchema },
     ]),
-    ProgramaModule,
+    
   ],
 
   providers: [CompetenciaService],

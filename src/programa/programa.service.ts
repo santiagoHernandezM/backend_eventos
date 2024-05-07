@@ -4,6 +4,7 @@ import { Programa } from './schema/programa.schema';
 import { Model } from 'mongoose';
 import { ActualizarProgramaDto, ProgramaDto } from './dto/programa.dto';
 import { InstructoresPrograma } from './schema/instructoresprograma.schema';
+import { CompetenciaService } from 'src/competencia/competencia.service';
 
 @Injectable()
 export class ProgramaService {
@@ -11,13 +12,14 @@ export class ProgramaService {
     @InjectModel(Programa.name) private ProgramaModel: Model<Programa>,
     @InjectModel(InstructoresPrograma.name)
     private instructoresProgramaModel: Model<InstructoresPrograma>,
+    private readonly competencias: CompetenciaService
   ) {}
 
   /* Todos los metodos de obtener */
   async obtenerTodo(): Promise<NotFoundException | Programa[]> {
     return await this.ProgramaModel.find().then((data) => {
       if (data) {
-        return data;
+         return data;
       } else {
         return new NotFoundException(
           'No se encontraron documentos en programas',
@@ -25,6 +27,32 @@ export class ProgramaService {
       }
     });
   }
+
+  async  programacompetencia(): Promise<NotFoundException | Programa[]> {
+    return await this.ProgramaModel.find().then( async (data) =>  {
+      const solver = []
+     if (data) {
+        for (let elemento of data )
+        {
+             let objeto = JSON.parse(JSON.stringify(elemento))
+             objeto.competencia = null
+             const resp =  await this.competencias.obtenerCompetenciasPorPrograma(elemento._id.toString())
+             
+            if (resp.length > 0) 
+               {
+                objeto.competencia = resp[0]
+               }
+           solver.push(objeto)
+        }
+        return solver;
+      } else {
+        return new NotFoundException(
+          'No se encontraron documentos en programas',
+        );
+      }
+    });
+  }
+
   async obtenerProgramaId(id: string): Promise<NotFoundException | Programa> {
     return await this.ProgramaModel.findById(id).then((data) => {
       if (data) {

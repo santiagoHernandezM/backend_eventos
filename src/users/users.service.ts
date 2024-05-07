@@ -54,9 +54,10 @@ export class UsersService {
   }
 
   async crearUser(user: UserDto) {
+   
     const existeCorreo = await this.validarCorreo(user.correo);
     if (existeCorreo) {
-      console.log('el correo existe');
+    
       return { ...user, registrado: 'No' };
     } else {
       const userBd = {
@@ -74,10 +75,12 @@ export class UsersService {
   }
 
   async validarCorreo(email: string): Promise<boolean> {
+   
     const user = await this.userModel.findOne({ correo: email });
 
     if (user) {
-      return true;
+        return true;
+     
     }
     return false;
   }
