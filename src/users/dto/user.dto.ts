@@ -76,7 +76,7 @@ export class UserLoginDto {
   @IsNotEmpty()
   @IsEmail()
   @IsString()
-  @Matches(/^(?!\s*$).+/, { message: 'El correo no puede ser estar vacío' })
+  @Matches(/^(?!\s*$).+/, { message: 'El correo no puede estar vacío' })
   readonly correo: string;
 
   @IsNotEmpty()
@@ -104,32 +104,32 @@ export class ActualizarUserDto {
 
   @ApiProperty()
   @IsOptional()
-  @Matches(/^(?!\s*$).+/, { message: 'El documento no puede ser estar vacío' })
+  @Matches(/^(?!\s*$).+/, { message: 'El documento no puede estar vacío' })
   readonly documento: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  @Matches(/^(?!\s*$).+/, { message: 'El nombre no puede ser estar vacío' })
+  @Matches(/^(?!\s*$).+/, { message: 'El nombre no puede estar vacío' })
   readonly nombre: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  @Matches(/^(?!\s*$).+/, { message: 'El apellido no puede ser estar vacío' })
+  @Matches(/^(?!\s*$).+/, { message: 'El apellido no puede estar vacío' })
   readonly apellido: string;
 
   @ApiProperty()
   @IsOptional()
   @IsEmail()
   @IsString()
-  @Matches(/^(?!\s*$).+/, { message: 'El correo no puede ser estar vacío' })
+  @Matches(/^(?!\s*$).+/, { message: 'El correo no puede estar vacío' })
   readonly correo: string;
 
   @ApiProperty()
   @IsOptional()
   @IsString()
-  @Matches(/^(?!\s*$).+/, { message: 'El celular no puede ser estar vacío' })
+  @Matches(/^(?!\s*$).+/, { message: 'El celular no puede estar vacío' })
   readonly celular: string;
 
   @ApiProperty()

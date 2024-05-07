@@ -11,8 +11,8 @@ import {
 import { CentroService } from './centro.service';
 import { CentroDto, ActualizarCentroDto } from './dto/centro.dto';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
-import { InstructorAuthGuard } from 'src/guard/instructor.guard';
-import { AdminAuthGuard } from 'src/guard/admin.guard';
+import { InstructorAuthGuard } from 'src/auth/guards/instructor.guard';
+import { AdminAuthGuard } from 'src/auth/guards/admin.guard';
 
 @ApiTags('Centro')
 // @UseGuards(AdminAuthGuard)
@@ -30,7 +30,6 @@ export class CentroController {
     name: 'id',
     description: 'ObjectId del centro',
   })
-
   @Get('/:id')
   async obtenerCentroPorId(@Param('id') id: string) {
     return await this.centro.centroPorId(id);

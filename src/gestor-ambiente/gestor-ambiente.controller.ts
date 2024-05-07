@@ -10,7 +10,7 @@ import {
 import { GestorAmbienteService } from './gestor-ambiente.service';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { ValidateObjectidPipe } from 'src/common/validate-objectid/validate-objectid.pipe';
-import { InstructorAuthGuard } from 'src/guard/instructor.guard';
+import { InstructorAuthGuard } from 'src/auth/guards/instructor.guard';
 
 @ApiTags('gestor-ambiente')
 //@UseGuards(InstructorAuthGuard)

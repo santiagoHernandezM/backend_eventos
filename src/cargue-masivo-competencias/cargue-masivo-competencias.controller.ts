@@ -10,7 +10,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CargueMasivoCompetenciasService } from './cargue-masivo-competencias.service';
 import { diskStorage } from 'multer';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { AdminAuthGuard } from 'src/guard/admin.guard';
+import { AdminAuthGuard } from 'src/auth/guards/admin.guard';
 
 @ApiTags('Carga masiva de competencias')
 //@UseGuards(AdminAuthGuard)
@@ -47,7 +47,6 @@ export class CargueMasivoCompetenciasController {
     return result;
   }
 
-
   @Post('cargarinstructor')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -69,10 +68,9 @@ export class CargueMasivoCompetenciasController {
   async uploadFileInstructor(
     @UploadedFile() file: Express.Multer.File,
     @Body('centro') centro: string,
-      ): Promise<string> {
-     const result = await this.cargue.processInstructor(file,centro);
+  ): Promise<string> {
+    const result = await this.cargue.processInstructor(file, centro);
     return result;
-   
   }
 
   @Post('cargarprogramas')
@@ -96,9 +94,8 @@ export class CargueMasivoCompetenciasController {
   async uploadFileProgramas(
     @UploadedFile() file: Express.Multer.File,
     @Body('centro') centro: string,
-      ): Promise<string> {
-     const result = await this.cargue.processProgramas(file);
+  ): Promise<string> {
+    const result = await this.cargue.processProgramas(file);
     return result;
-   
   }
 }

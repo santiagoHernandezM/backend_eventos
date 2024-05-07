@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { EmailService } from './email.service';
 import { CreateEmailDto } from './dto/create-email.dto';
 import { UpdateEmailDto } from './dto/update-email.dto';
@@ -7,8 +15,8 @@ import { UpdateEmailDto } from './dto/update-email.dto';
 export class EmailController {
   constructor(private readonly emailService: EmailService) {}
 
-  @Post('/enviarcorreo')
-  enviarCorreo(@Body() createEmailDto: CreateEmailDto) {
-    return this.emailService.enviarCorreo(createEmailDto);
-  }
+  // @Post('/enviarcorreo')
+  // enviarCorreoRecuperarPassword(@Body() createEmailDto: CreateEmailDto) {
+  //   return this.emailService.enviarCorreo(createEmailDto);
+  // }
 }

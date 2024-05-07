@@ -8,6 +8,8 @@ import {
   InstructoresPrograma,
   InstructoresProgramaSchema,
 } from 'src/programa/schema/instructoresprograma.schema';
+import { AuthModule } from 'src/auth/auth.module';
+import { EmailModule } from 'src/email/email.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -15,6 +17,8 @@ import {
       { name: InstructoresPrograma.name, schema: InstructoresProgramaSchema },
     ]),
     ProgramaModule,
+    EmailModule,
+    AuthModule,
   ],
   providers: [UsersService],
   controllers: [UsersController],

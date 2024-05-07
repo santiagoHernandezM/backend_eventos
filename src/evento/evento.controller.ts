@@ -15,7 +15,7 @@ import {
   eliminarEventoDto,
   eliminarEventoEspecificoDto,
 } from './dto/eliminarEvento.dto';
-import { InstructorAuthGuard } from 'src/guard/instructor.guard';
+import { InstructorAuthGuard } from 'src/auth/guards/instructor.guard';
 
 @ApiTags('Evento')
 //@UseGuards(InstructorAuthGuard)

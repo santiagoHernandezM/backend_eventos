@@ -11,7 +11,7 @@ import {
 import { ProgramaService } from './programa.service';
 import { ActualizarProgramaDto, ProgramaDto } from './dto/programa.dto';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
-import { InstructorAuthGuard } from 'src/guard/instructor.guard';
+import { InstructorAuthGuard } from 'src/auth/guards/instructor.guard';
 
 @ApiTags('Programas')
 // @UseGuards(InstructorAuthGuard)

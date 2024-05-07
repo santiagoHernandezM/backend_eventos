@@ -14,7 +14,7 @@ import {
   ActualizarTipoDeVinculacionDto,
 } from './dto/tipo-de-vinculacion.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { AdminAuthGuard } from 'src/guard/admin.guard';
+import { AdminAuthGuard } from 'src/auth/guards/admin.guard';
 
 @ApiTags('Tipo de vinculación')
 @UseGuards(AdminAuthGuard)

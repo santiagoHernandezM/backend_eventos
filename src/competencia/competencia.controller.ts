@@ -13,8 +13,7 @@ import {
   competenciaDto,
 } from './dto/competencia.dto';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
-import { AdminAuthGuard } from 'src/guard/admin.guard';
-
+import { AdminAuthGuard } from 'src/auth/guards/admin.guard';
 
 @ApiTags('Competencia')
 // @UseGuards(AdminAuthGuard)

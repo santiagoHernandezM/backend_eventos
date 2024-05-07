@@ -11,7 +11,7 @@ import {
 import { SedesService } from './sedes.service';
 import { ActualizarSedeDto, SedeDto } from './dto/sedes.dto';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
-import { CoordinadorAuthGuard } from 'src/guard/coordinador.guard';
+import { CoordinadorAuthGuard } from 'src/auth/guards/coordinador.guard';
 
 @ApiTags('Sedes')
 // @UseGuards(CoordinadorAuthGuard)
