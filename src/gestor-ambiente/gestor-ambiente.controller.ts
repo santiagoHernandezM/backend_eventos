@@ -13,7 +13,7 @@ import { ValidateObjectidPipe } from 'src/common/validate-objectid/validate-obje
 import { InstructorAuthGuard } from 'src/guard/instructor.guard';
 
 @ApiTags('gestor-ambiente')
-@UseGuards(InstructorAuthGuard)
+//@UseGuards(InstructorAuthGuard)
 @Controller('gestor-ambiente')
 export class GestorAmbienteController {
   constructor(private readonly gestorAmbienteService: GestorAmbienteService) {}

@@ -4,7 +4,7 @@ import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { CoordinadorAuthGuard } from 'src/guard/coordinador.guard';
 
 @ApiTags('Gestor de tiempo')
-@UseGuards(CoordinadorAuthGuard)
+//@UseGuards(CoordinadorAuthGuard)
 @Controller('gestor-t')
 export class GestorTController {
   constructor(private readonly gestorTService: GestorTService) {}

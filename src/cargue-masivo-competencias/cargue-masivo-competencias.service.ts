@@ -112,8 +112,7 @@ export class CargueMasivoCompetenciasService {
        const tf2 = JSON.stringify(f2).split('T')
        const fe2 = tf2[0].substring(1, tf1[0].length);
 
-        const date = moment(f1, 'YYYY-MM-DD').format('YYYY/MM/DD');
-       
+        
         const instructor = {
           documento: columna['A'], //Código de la competencia en la Columna A del excel
           nombre: columna['B'], //Nombre de la competencia en la Co password:
