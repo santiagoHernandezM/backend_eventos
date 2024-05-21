@@ -34,6 +34,7 @@ export class BloqueService {
   async crearBloque(bloqueDto: CrearBloqueDto) {
     const existeBloque = await this.bloqueModel.findOne({
       nomenclatura: bloqueDto.nomenclatura,
+      sede : bloqueDto.sede
     });
 
     return existeBloque
