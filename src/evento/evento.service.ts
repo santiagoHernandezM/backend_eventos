@@ -489,4 +489,20 @@ export class EventoService {
 
     return response;
   }
+
+  async getEventosByProgrmasMesAnio(mes: number, year: number, programaIds: string[]): Promise<any[]> {
+    const eventos = await this.eventoModel.find({ mes, year })
+    .populate('instructor')
+    .exec();
+    const programas = [];
+      eventos.forEach(evento => {
+      evento.eventos.forEach(e => {
+        if (programaIds.includes(e.programa.id)) {
+          e["instructor"] = evento.instructor
+          programas.push(e);
+        }
+      });
+    });
+    return programas;
+  }
 }
