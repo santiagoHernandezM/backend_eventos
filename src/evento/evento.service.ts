@@ -461,6 +461,8 @@ export class EventoService {
 
       return evento.eventos.map((e) => {
         const horas = e.horario.split('-');
+        const dias = e.diastrabajados.sort((a,b) => a - b).join('-')
+        const dd = dias.split('-')
         const sesiones = e.diastrabajados.length;
         return {
           year: year,
@@ -471,8 +473,8 @@ export class EventoService {
           programa: e.programa.nombre,
           horaInicio: horas[0],
           horaFin: horas[1],
-          fechaInicio: e.diastrabajados[0],
-          fechaFin: e.diastrabajados[sesiones - 1],
+          fechaInicio: dd[0],
+          fechaFin: dd[sesiones - 1],
           dia: e.dia,
           competencia: e.competencia.competencia,
           resultado: e.resultado.resultado,
@@ -482,7 +484,7 @@ export class EventoService {
           totalSesiones: sesiones,
           horaSesion: e.horas / sesiones,
           totalHoras: e.horas,
-          dias: e.diastrabajados,
+          //dias: e.diastrabajados,
         };
       });
     });
@@ -498,8 +500,33 @@ export class EventoService {
       eventos.forEach(evento => {
       evento.eventos.forEach(e => {
         if (programaIds.includes(e.programa.id)) {
-          e["instructor"] = evento.instructor
-          programas.push(e);
+          const horas = e.horario.split('-');
+          const dias = e.diastrabajados.sort((a,b) => a - b).join('-')
+          const dd = dias.split('-')
+          const sesiones = e.diastrabajados.length;
+          programas.push( {
+            year: year,
+            mes: mes,
+            documentoInstructor: evento.instructor.documento,
+            nombreInstructor: evento.instructor.nombre,
+            numeroFicha: e.ficha.codigo,
+            programa: e.programa.nombre,
+            horaInicio: horas[0],
+            horaFin: horas[1],
+            fechaInicio: dd[0],
+            fechaFin: dd[sesiones - 1],
+            dia: e.dia,
+            competencia: e.competencia.competencia,
+            resultado: e.resultado.resultado,
+            tipo: e.nivel,
+            municipio: e.municipio,
+            ambiente: e.ambiente.ambiente,
+            totalSesiones: sesiones,
+            horaSesion: e.horas / sesiones,
+            totalHoras: e.horas,
+            
+          });
+
         }
       });
     });
