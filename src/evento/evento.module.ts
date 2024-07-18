@@ -6,12 +6,15 @@ import { Evento, EventoSchema } from './schema/evento.schema';
 import { GestorTModule } from 'src/gestor-t/gestor-t.module';
 import { GestorAmbienteModule } from 'src/gestor-ambiente/gestor-ambiente.module';
 import * as moment from 'moment';
+import { GestorHorasFichaModule } from 'src/gestor-horas-ficha/gestor-horas-ficha.module';
+import { GestorHorasFichaService } from 'src/gestor-horas-ficha/gestor-horas-ficha.service';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Evento.name, schema: EventoSchema }]),
     GestorTModule,
     GestorAmbienteModule,
+    GestorHorasFichaModule,
   ],
 
   providers: [
@@ -20,6 +23,7 @@ import * as moment from 'moment';
       provide: 'MomentWrapper',
       useValue: moment,
     },
+    GestorHorasFichaService,
   ],
   controllers: [EventoController],
 })

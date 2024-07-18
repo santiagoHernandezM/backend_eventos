@@ -49,15 +49,83 @@ export class UsersService {
       .populate('programas');
   }
 
+  async getInstructoresProgramas(id: string) {
+    const coordinador = await this.userModel.findOne({ _id: id });
+    if (coordinador != null) {
+      /*Filtro todos los documentos dónde
+       - No coincida como mi documento
+       - Donde algún programa coincida con el que coordina el coordinador
+      */
+      return await this.userModel.aggregate([
+        {
+          $match: {
+            $and: [
+              { _id: { $ne: coordinador._id } },
+              { programas: { $exists: true, $in: coordinador.programas } },
+            ],
+          },
+        },
+        {
+          $addFields: {
+            programasCoincidentes: {
+              $filter: {
+                input: '$programas',
+                as: 'programa',
+                cond: { $in: ['$$programa', coordinador.programas] },
+              },
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: 'programas',
+            localField: 'programas',
+            foreignField: '_id',
+            as: 'programas',
+          },
+        },
+        {
+          $lookup: {
+            from: 'centros',
+            localField: 'centro',
+            foreignField: '_id',
+            as: 'centro',
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            password: 0,
+            programasCoincidentes: 0,
+          },
+        },
+      ]);
+      /* find({
+        $and: [
+          {
+            _id: { $ne: coordinador._id },
+          },
+          { programas: { $in: coordinador.programas } },
+        ],
+      }); */
+    }
+    return [];
+  }
+
+  async getProgramasCoordinador(id: string) {
+    return await this.userModel
+      .findOne({ _id: id })
+      .select(['programas'])
+      .populate('programas');
+  }
+
   async findOneAuth(email: string) {
     return await this.userModel.findOne({ email: email });
   }
 
   async crearUser(user: UserDto) {
-   
     const existeCorreo = await this.validarCorreo(user.correo);
     if (existeCorreo) {
-    
       return { ...user, registrado: 'No' };
     } else {
       const userBd = {
@@ -75,12 +143,10 @@ export class UsersService {
   }
 
   async validarCorreo(email: string): Promise<boolean> {
-   
     const user = await this.userModel.findOne({ correo: email });
 
     if (user) {
-        return true;
-     
+      return true;
     }
     return false;
   }
@@ -121,6 +187,27 @@ export class UsersService {
           : new NotFoundException(
               `No se encontro el usuario con id:${usuario.id}`,
             );
+      });
+  }
+
+  async cambiarEstadoUsuario(id: string, nuevoEstado: boolean) {
+    return await this.userModel
+      .findByIdAndUpdate(id, { activo: nuevoEstado })
+      .then((user) => {
+        return user.isModified
+          ? { error: false, message: 'Estado actualizado', ex: null }
+          : {
+              error: true,
+              message: 'No se pudo actualizar el estado',
+              ex: user,
+            };
+      })
+      .catch((error) => {
+        return {
+          error: true,
+          message: 'Error al actualizar el estado',
+          ex: error,
+        };
       });
   }
 

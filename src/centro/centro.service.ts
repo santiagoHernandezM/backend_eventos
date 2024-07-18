@@ -59,30 +59,26 @@ export class CentroService {
   async eliminarCentro(id: string) {
     try {
       // se deben eliminar las sedes, los bloques, los ambientes, y las fichas asociadas
-      const sedes = await this.sedeModel.find({centro: id})
-      console.log(sedes)
+      const sedes = await this.sedeModel.find({ centro: id });
+      console.log(sedes);
 
-
-      if (sedes.length > 0){
-
-        sedes.forEach(async({ _id }) => {
-
-          const bloques = await this.bloqueModel.find({sede: _id})
-          if (bloques.length > 0){
-            await this.bloqueModel.deleteMany({sede: _id})
+      if (sedes.length > 0) {
+        sedes.forEach(async ({ _id }) => {
+          const bloques = await this.bloqueModel.find({ sede: _id });
+          if (bloques.length > 0) {
+            await this.bloqueModel.deleteMany({ sede: _id });
           }
 
-          const ambientes = await this.ambienteModel.find({sede: _id})
-          if (ambientes.length > 0){
-            await this.ambienteModel.deleteMany({sede: _id})
+          const ambientes = await this.ambienteModel.find({ sede: _id });
+          if (ambientes.length > 0) {
+            await this.ambienteModel.deleteMany({ sede: _id });
           }
-        })
+        });
 
-        await this.sedeModel.deleteMany({centro: id})
+        await this.sedeModel.deleteMany({ centro: id });
       }
-      
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
 
     return await this.centroModel.findByIdAndRemove(id).then((data) => {
@@ -116,5 +112,13 @@ export class CentroService {
     } catch (error) {
       return new NotFoundException(`Error al hacer la búsqueda: ${error}`);
     }
+  }
+
+  async getCentroByNombre(nombre: string) {
+    return await this.centroModel
+      .findOne({
+        nombre,
+      })
+      .populate('regional');
   }
 }

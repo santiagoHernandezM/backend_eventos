@@ -8,6 +8,7 @@ import { CompetenciaService } from 'src/competencia/competencia.service';
 
 @Injectable()
 export class ProgramaService {
+
   constructor(
     @InjectModel(Programa.name) private ProgramaModel: Model<Programa>,
     @InjectModel(InstructoresPrograma.name)
@@ -140,6 +141,7 @@ export class ProgramaService {
           );
     });
   }
+  
   async obtenerDuracion(id) {
     return await this.ProgramaModel.findById(id).then((programa) => {
       return programa.duracion;

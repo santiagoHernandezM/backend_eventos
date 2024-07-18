@@ -3,6 +3,7 @@ import mongoose, { HydratedDocument } from 'mongoose';
 import { Centro } from 'src/centro/schema/centro.schema';
 import { ContratoDto } from '../dto/contrato.dto';
 import { Programa } from 'src/programa/schema/programa.schema';
+import { boolean } from 'joi';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -41,5 +42,8 @@ export class User {
 
   @Prop({ default: ['userBasic'] })
   roles: string[];
+
+  @Prop({ default: true })
+  activo: boolean;
 }
 export const UserSchema = SchemaFactory.createForClass(User);

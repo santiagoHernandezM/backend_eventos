@@ -15,7 +15,10 @@ export class GestorAmbiente {
   centro: Centro;
 
   @Prop()
-  ambientes: CreateGestorAmbienteDto;
+  ambientes: CreateGestorAmbienteDto[];
+
+  @Prop({ default: new Date().getFullYear() })
+  year: number;
 }
 
 export const GestorAmbienteSchema =

@@ -26,9 +26,13 @@ import { JwtModule } from '@nestjs/jwt';
 import configuration from './config/configuration';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailModule } from './email/email.module';
+import { GestorHorasFichaModule } from './gestor-horas-ficha/gestor-horas-ficha.module';
+import { GestorAmbienteService } from './gestor-ambiente/gestor-ambiente.service';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       load: [configuration],
       isGlobal: true,
@@ -73,8 +77,8 @@ import { EmailModule } from './email/email.module';
     AuthModule,
     UsersModule,
     JwtModule,
-    EmailModule
-  
+    EmailModule,
+    GestorHorasFichaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

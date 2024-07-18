@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
+import * as moment from 'moment-timezone';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 //import moment from 'moment';
 // import fc from 'festivos-colombia';
@@ -9,7 +10,23 @@ const fc = require('festivos-colombia');
 //@UseGuards(JwtAuthGuard)
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  private meses: string[] = [];
+  constructor(private readonly appService: AppService) {
+    this.meses = [
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
+    ];
+  }
 
   @Get()
   getHello(): string {
@@ -18,11 +35,11 @@ export class AppController {
 
   @Get('date')
   getDatosFecha() {
-    const moment = require('moment');
+    const now = moment().tz('America/Bogota');
     return {
-      mesNum: moment().month() + 1,
-      mes: moment().format('MMMM'),
-      year: moment().year(),
+      mesNum: now.month() + 1,
+      mes: this.meses[now.month()],
+      year: now.year(),
     };
   }
 

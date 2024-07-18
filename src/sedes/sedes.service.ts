@@ -5,15 +5,16 @@ import { Model } from 'mongoose';
 import { ActualizarSedeDto, SedeDto } from './dto/sedes.dto';
 import { Bloque } from 'src/bloque/schema/bloque.schema';
 import { Ambiente } from 'src/ambiente/schemas/ambiente.schema';
+import { GestorAmbiente } from 'src/gestor-ambiente/schema/gestor-ambiente.schema';
 
 @Injectable()
 export class SedesService {
   constructor(
     @InjectModel(Sede.name) private SedesModel: Model<Sede>,
-
     @InjectModel(Bloque.name) private bloqueModel: Model<Bloque>,
-
     @InjectModel(Ambiente.name) private ambienteModel: Model<Ambiente>,
+    @InjectModel(GestorAmbiente.name)
+    private gestorAmbiente: Model<GestorAmbiente>,
   ) {}
 
   async obtenerTodo(): Promise<NotFoundException | Sede[]> {
@@ -23,9 +24,9 @@ export class SedesService {
         path: 'centro',
         populate: [
           {
-            path: 'regional'
-          }
-        ]
+            path: 'regional',
+          },
+        ],
       })
       .then((data) => {
         if (data) {
@@ -36,27 +37,38 @@ export class SedesService {
       });
   }
 
+  async getSede(sede: string): Promise<Sede> {
+    return await this.SedesModel.findOne({ _id: sede });
+  }
+  
   async crearSede(sedeDto: SedeDto): Promise<NotFoundException | Sede> {
     const sedes = new this.SedesModel(sedeDto);
-    return await sedes.save();
+    return await sedes.save().then(async (sede) => {
+      //Creamos el gestor de ambientes para la sede creada
+      await this.gestorAmbiente.create({
+        ambientes: [],
+        centro: sede.centro,
+        sede: sede._id,
+      });
+      return sede;
+    });
   }
 
   async borrarSede(id: string) {
     try {
       // Eliminación de bloques
-      const bloques = await this.bloqueModel.find({sede: id})
-      if (bloques.length > 0){
-        await this.bloqueModel.deleteMany({sede: id})
-      }
-      
-      // Eliminación de ambientes
-      const ambientes = await this.ambienteModel.find({sede: id})
-      if (ambientes.length > 0){
-        await this.ambienteModel.deleteMany({sede: id})
+      const bloques = await this.bloqueModel.find({ sede: id });
+      if (bloques.length > 0) {
+        await this.bloqueModel.deleteMany({ sede: id });
       }
 
+      // Eliminación de ambientes
+      const ambientes = await this.ambienteModel.find({ sede: id });
+      if (ambientes.length > 0) {
+        await this.ambienteModel.deleteMany({ sede: id });
+      }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
 
     return await this.SedesModel.findByIdAndRemove(id).then((data) => {
@@ -82,15 +94,14 @@ export class SedesService {
 
   async sedesPorCentro(idCentro: string) {
     return await this.SedesModel.find({
-      centro: idCentro
+      centro: idCentro,
     })
-    // .populate('centro')
-    .populate({
-      path: 'centro',
-      populate: {
-        path: 'regional'
-      }
-      
-    })
+      // .populate('centro')
+      .populate({
+        path: 'centro',
+        populate: {
+          path: 'regional',
+        },
+      });
   }
 }

@@ -80,6 +80,21 @@ export class UsersController {
     return await this.usersService.roles();
   }
 
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'ObjectId del usuario coordinador',
+  })
+  @Get('/coordinador/:id/programas/instructores')
+  async getInstructoresProgramas(@Param('id') id: string) {
+    return await this.usersService.getInstructoresProgramas(id);
+  }
+
+  @Get('/coordinador/:id')
+  async getProgramasCoordinador(@Param('id') id: string) {
+    return await this.usersService.getProgramasCoordinador(id);
+  }
+
   @ApiParam({ name: 'programa', type: String, description: 'Id del programa' })
   @ApiParam({ name: 'centro', type: String, description: 'Id del centro' })
   @Get('instructores/programa/:programa/centro/:centro')
@@ -125,6 +140,24 @@ export class UsersController {
   @Put('actualizar')
   async actualizarUsuario(@Body() User: ActualizarUserDto) {
     return await this.usersService.actualizarUsuario(User);
+  }
+
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'ObjectId del usuario a cambiar el estado(activo)',
+  })
+  @ApiParam({
+    name: 'estado',
+    type: Boolean,
+    description: 'Nuevo estado del usuario (true/false)',
+  })
+  @Put('/:id/nuevo_estado/:estado')
+  async cambiarEstadoUsuario(
+    @Param('id') id: string,
+    @Param('estado') nuevo: boolean,
+  ) {
+    return await this.usersService.cambiarEstadoUsuario(id, nuevo);
   }
 
   @Delete('eliminar/:id')

@@ -7,17 +7,23 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { GestorAmbiente } from './schema/gestor-ambiente.schema';
 import { Model } from 'mongoose';
-import { AmbienteService } from 'src/ambiente/ambiente.service';
 import { eventosDto } from 'src/evento/dto/eventos.dto';
 import { eliminarEventoEspecificoDto } from 'src/evento/dto/eliminarEvento.dto';
 import { SedesService } from 'src/sedes/sedes.service';
+import {
+  AgregarAmbienteGestorDto,
+  CreateGestorAmbienteDto,
+} from './dto/gestor-ambiente.dto';
+import * as moment from 'moment-timezone';
+import { Ambiente } from 'src/ambiente/schemas/ambiente.schema';
+import { IAmbiente } from 'src/ambiente/interfaces/ambiente.interface';
 
 @Injectable()
 export class GestorAmbienteService {
   constructor(
     @InjectModel(GestorAmbiente.name)
     private gestorAmbienteModel: Model<GestorAmbiente>,
-    @Inject(AmbienteService) private ambienteService: AmbienteService,
+    @InjectModel(Ambiente.name) private ambienteModel: Model<Ambiente>,
     @Inject(SedesService) private sedesService: SedesService,
   ) {}
 
@@ -33,6 +39,8 @@ export class GestorAmbienteService {
       return sede.id;
     });
 
+    const now = moment().tz('America/Bogota');
+
     // El uso de promise all es por que los Maps asincronicos anidados se comportan de manera indetermindas
     await Promise.all(
       sedes.map(async (sede: any) => {
@@ -40,9 +48,9 @@ export class GestorAmbienteService {
           centro: centro,
           sede: sede,
           ambientes: [],
+          year: now.year(),
         };
-        const ambientesDeLaSede =
-          await this.ambienteService.ambientesPorSede(sede);
+        const ambientesDeLaSede = await this.ambientesPorSede(sede);
 
         /*       ambientesDeLaSede.map((ambiente: any) => {
           let ambienteParaDisponibilidad = {
@@ -68,6 +76,46 @@ export class GestorAmbienteService {
       }),
     );
     return await this.gestorAmbienteModel.insertMany(insertAmbientes);
+  }
+
+  async agregarAmbienteGestor(ambiente: AgregarAmbienteGestorDto) {
+    //Buscamos si existe el gestor para la sede
+    const now = moment().tz('America/Bogota');
+    const gestor = await this.gestorAmbienteModel.findOne({
+      sede: ambiente.sede,
+      year: now.year(),
+    });
+
+    const calendarioEstatico = Array(31).fill({
+      morning: null,
+      afternoon: null,
+      night: null,
+    });
+
+    const newAmbiente: CreateGestorAmbienteDto = {
+      id: ambiente.ambiente,
+      nombre: ambiente.nomenclatura_codigo,
+      calendario: calendarioEstatico,
+    };
+
+    if (gestor != null) {
+      //Agregamos el ambiente al gestor
+      return await this.gestorAmbienteModel.findByIdAndUpdate(gestor._id, {
+        $push: {
+          ambientes: newAmbiente,
+        },
+      });
+    } else {
+      //No existe el gestor, lo creamos
+      //Buscamos la sede para coger el _id del centro
+      const sede = await this.sedesService.getSede(ambiente.sede);
+      return await this.gestorAmbienteModel.create({
+        sede: ambiente.sede,
+        centro: sede.centro,
+        ambientes: [newAmbiente],
+        year: now.year(),
+      });
+    }
   }
 
   async actualizarAmbiente(evento: eventosDto[], instructor: string) {
@@ -153,6 +201,7 @@ export class GestorAmbienteService {
       $set: { ambientes: ambienteActualizado },
     });
   }
+
   async findAll() {
     try {
       return this.gestorAmbienteModel.find();
@@ -178,6 +227,8 @@ export class GestorAmbienteService {
   }
 
   async findBySede(sede: string) {
+    const now = moment().tz('America/Bogota');
+
     return await this.gestorAmbienteModel.find({ sede: sede }).then((data) => {
       if (data) {
         return data;
@@ -187,8 +238,16 @@ export class GestorAmbienteService {
       );
     });
   }
+
   async reiniciarDisponibilidadCentro(centro: string) {
     await this.gestorAmbienteModel.deleteMany({ centro: centro });
     return await this.crearGestorActual(centro);
+  }
+
+  async ambientesPorSede(sede: string): Promise<IAmbiente[] | []> {
+    return await this.ambienteModel
+      .find({ sede: sede })
+      .populate('bloque')
+      .populate('sede');
   }
 }

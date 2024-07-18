@@ -16,6 +16,7 @@ import {
 } from './dto/eliminarEvento.dto';
 import { GestorAmbienteService } from 'src/gestor-ambiente/gestor-ambiente.service';
 import * as moment from 'moment';
+import { GestorHorasFichaService } from 'src/gestor-horas-ficha/gestor-horas-ficha.service';
 
 @Injectable()
 export class EventoService {
@@ -24,6 +25,8 @@ export class EventoService {
     @Inject(GestorTService) private gestorTService: GestorTService,
     @Inject(GestorAmbienteService)
     private gestorAmbienteService: GestorAmbienteService,
+    @Inject(GestorHorasFichaService)
+    private gestorHorasFichaService: GestorHorasFichaService,
   ) {}
 
   async obtenerEventos(): Promise<Evento[]> {
@@ -107,6 +110,29 @@ export class EventoService {
       evento.instructor,
     );
 
+    //Actualizar el gestor de la ficha
+    //['2684','2684','123']
+    let codigos = evento.eventos.flatMap((evento) => evento.ficha.codigo);
+    codigos = [...new Set(codigos)];
+
+    const reporte = codigos.map((cod) => {
+      const suma = evento.eventos.reduce((suma, e) => {
+        return e.ficha.codigo == cod ? suma + e.horas : suma;
+      }, 0);
+      return {
+        codigo_ficha: cod,
+        horas: suma,
+      };
+    });
+
+    // [{codigo_ficha, horas}]
+    await this.gestorHorasFichaService.actualizarHorasInstructor({
+      reporte,
+      mes: evento.mes,
+      year: evento.year,
+      id_instructor: evento.instructor,
+    });
+
     const registroEventoExistente = await this.eventoModel.find({
       mes: evento.mes,
       year: evento.year,
@@ -115,7 +141,7 @@ export class EventoService {
 
     if (registroEventoExistente.length === 0) {
       const createdEvento = new this.eventoModel(evento);
-      createdEvento.save();
+      await createdEvento.save();
       return {
         statusCode: HttpStatus.CREATED,
         message: createdEvento,
@@ -367,7 +393,8 @@ export class EventoService {
       })
       .exec();
 
-    let fichaEvento = [];
+    let fichaEvento = [],
+      codigo_ficha: string;
     evento[0].eventos.forEach((event, index) => {
       if (
         event.diastrabajados.some((item) =>
@@ -375,8 +402,10 @@ export class EventoService {
         )
       ) {
         fichaEvento = evento[0].eventos.splice(index, 1);
+        codigo_ficha = event.ficha.codigo;
       }
     });
+
     delete evento[0]._id;
     //Si se elimino un evento con splice
     if (fichaEvento.length == 1) {
@@ -395,7 +424,13 @@ export class EventoService {
       //true si se resto bien sino false
       const tiempoFichaGestorActualizado =
         await this.gestorTService.restarTiempoFicha(gestorActualizar);
-
+      await this.gestorHorasFichaService.restarHorasInstructorFicha({
+        codigo_ficha: codigo_ficha,
+        horas: eventoInfo.horas,
+        id_instructor: eventoInfo.instructor,
+        mes: eventoInfo.mes,
+        year: eventoInfo.year,
+      });
       return tiempoFichaGestorActualizado;
     }
 
@@ -437,7 +472,13 @@ export class EventoService {
     )[0];
 
     await eventos.save();
-
+    await this.gestorHorasFichaService.restarHorasInstructorFicha({
+      codigo_ficha: eventoEspecificoDto.evento.ficha.codigo,
+      horas: eventoEspecificoDto.evento.horas,
+      id_instructor: eventoEspecificoDto.instructor,
+      mes: monthSearch,
+      year: eventos.year,
+    });
     return eventoEliminado;
   }
 
@@ -461,8 +502,8 @@ export class EventoService {
 
       return evento.eventos.map((e) => {
         const horas = e.horario.split('-');
-        const dias = e.diastrabajados.sort((a,b) => a - b).join('-')
-        const dd = dias.split('-')
+        const dias = e.diastrabajados.sort((a, b) => a - b).join('-');
+        const dd = dias.split('-');
         const sesiones = e.diastrabajados.length;
         return {
           year: year,
@@ -492,19 +533,24 @@ export class EventoService {
     return response;
   }
 
-  async getEventosByProgrmasMesAnio(mes: number, year: number, programaIds: string[]): Promise<any[]> {
-    const eventos = await this.eventoModel.find({ mes, year })
-    .populate('instructor')
-    .exec();
+  async getEventosByProgrmasMesAnio(
+    mes: number,
+    year: number,
+    programaIds: string[],
+  ): Promise<any[]> {
+    const eventos = await this.eventoModel
+      .find({ mes, year })
+      .populate('instructor')
+      .exec();
     const programas = [];
-      eventos.forEach(evento => {
-      evento.eventos.forEach(e => {
+    eventos.forEach((evento) => {
+      evento.eventos.forEach((e) => {
         if (programaIds.includes(e.programa.id)) {
           const horas = e.horario.split('-');
-          const dias = e.diastrabajados.sort((a,b) => a - b).join('-')
-          const dd = dias.split('-')
+          const dias = e.diastrabajados.sort((a, b) => a - b).join('-');
+          const dd = dias.split('-');
           const sesiones = e.diastrabajados.length;
-          programas.push( {
+          programas.push({
             year: year,
             mes: mes,
             documentoInstructor: evento.instructor.documento,
@@ -524,9 +570,7 @@ export class EventoService {
             totalSesiones: sesiones,
             horaSesion: e.horas / sesiones,
             totalHoras: e.horas,
-            
           });
-
         }
       });
     });

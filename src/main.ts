@@ -1,13 +1,17 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { GestorAmbienteService } from './gestor-ambiente/gestor-ambiente.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
+
 const cors = require('cors');
+let app: INestApplication<any>;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  app = await NestFactory.create(AppModule);
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, // Validar los arreglos vacios
@@ -31,6 +35,10 @@ async function bootstrap() {
 
   const configService = app.get<ConfigService>(ConfigService);
   const port = configService.get('PORT');
-  await app.listen(port);
+  await app.listen(port,()=>{});
 }
 bootstrap();
+
+
+
+
