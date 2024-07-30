@@ -13,10 +13,10 @@ export class AppService {
     return 'Hola Sena!';
   }
 
-  //Se ejecuta el cron cada fin de mes a la medianoche
-  /* @Cron('0 0 0 L * *', {
+  //Se ejecuta el 1 de cada mes a 1 de la madrugada
+  @Cron('0 1 1 * *', {
     timeZone: 'America/Bogota',
-  }) */
+  })
   async registrarCronGestorAmbiente() {
     const nombre_ccit = 'CENTRO DE COMERCIO, INDUSTRIA Y TURISMO CCIT';
     const centro = await this.centroService.getCentroByNombre(nombre_ccit);
