@@ -34,6 +34,11 @@ export class UsersController {
     return await this.usersService.findOne(nombre);
   }
 
+  @Get('/correo/:correo')
+  async findOneAuth(@Param('correo') correo: string) {
+    return this.usersService.findOneAuth(correo);
+  }
+
   @ApiParam({
     name: 'id',
     description: 'El id de un instructor',

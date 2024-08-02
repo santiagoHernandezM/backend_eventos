@@ -61,6 +61,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         'programas',
         'centro',
         'roles',
+        'activo'
       ])
       .populate('programas');
     if (!userBd) {
@@ -68,6 +69,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     } else if (!bcrypt.compareSync(password, userBd.password)) {
       throw new UnauthorizedException('La contraseña es incorrecta');
     }
+    else if (!userBd.activo) {
+      throw new UnauthorizedException('Usuario inactivo')
+    }
+    console.log(userBd)
     const payloadZ = {
       sub: userBd.id,
       correo: userBd.correo,

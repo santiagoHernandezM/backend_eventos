@@ -119,8 +119,8 @@ export class UsersService {
       .populate('programas');
   }
 
-  async findOneAuth(email: string) {
-    return await this.userModel.findOne({ email: email });
+  async findOneAuth(correo: string) {
+    return await this.userModel.findOne({ correo });
   }
 
   async crearUser(user: UserDto) {
@@ -354,7 +354,7 @@ export class UsersService {
     });
   }
 
-  async forgotPassword(createEmailDto: CreateEmailDto) {
+  async   forgotPassword(createEmailDto: CreateEmailDto) {
     const { email } = createEmailDto;
     const usuario = await this.userModel.findOne({ correo: email });
 
