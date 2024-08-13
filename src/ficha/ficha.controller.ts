@@ -48,6 +48,11 @@ export class FichaController {
     return await this.fichaService.obtenerFichasPorCentro(programas, centro);
   }
 
+  @Get('/usuario/:id')
+  async fichasPorUsuario(@Param('id') id: string) {
+    return await this.fichaService.fichasPorUsuario(id);
+  }
+
   @ApiBody({
     type: FichaDto,
   })

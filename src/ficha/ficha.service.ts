@@ -8,11 +8,13 @@ import { ProgramaService } from 'src/programa/programa.service';
 import { GestorTService } from 'src/gestor-t/gestor-t.service';
 import * as moment from 'moment-timezone';
 import { GestorHorasFichaService } from 'src/gestor-horas-ficha/gestor-horas-ficha.service';
+import { User } from 'src/users/schema/user.schema';
 
 @Injectable()
 export class FichaService {
   constructor(
     @InjectModel(Ficha.name) private fichaModel: Model<Ficha>,
+    @InjectModel(User.name) private userModel: Model<User>,
     @Inject(CompetenciaService) readonly competenciaService: CompetenciaService,
     @Inject(ProgramaService) readonly programaService: ProgramaService,
     @Inject(GestorTService) readonly gestorTService: GestorTService,
@@ -348,5 +350,25 @@ export class FichaService {
       .populate({
         path: 'instructor',
       });
+  }
+
+  /**
+   *
+   * @param id Object id del usuario con rol coordinador
+   */
+  async fichasPorUsuario(id: string) {
+    const programasCoordinador = await this.userModel
+      .findOne({ _id: id })
+      .select(['programas']);
+
+    if (programasCoordinador != null) {
+      return await this.fichaModel
+        .find({
+          programa: { $in: programasCoordinador.programas },
+        })
+        .populate('programa')
+        .select(['_id', 'codigo', 'programa']);
+    }
+    return [];
   }
 }

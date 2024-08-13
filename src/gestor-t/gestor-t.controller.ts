@@ -1,7 +1,8 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put, UseGuards } from '@nestjs/common';
 import { GestorTService } from './gestor-t.service';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CoordinadorAuthGuard } from 'src/auth/guards/coordinador.guard';
+import { UpdateGestorTDto } from './dto/gestor-t.dto';
 
 @ApiTags('Gestor de tiempo')
 //@UseGuards(CoordinadorAuthGuard)
@@ -20,5 +21,14 @@ export class GestorTController {
   @Get('/:ficha')
   async obtenerGestor(@Param('ficha') ficha: string) {
     return await this.gestorTService.obtenerGestor(ficha);
+  }
+
+  @ApiBody({
+    description: 'Actualizar tiempos del gestor de una ficha',
+    type: UpdateGestorTDto,
+  })
+  @Put()
+  async actualizarGestorT(@Body() updateGestorT: UpdateGestorTDto) {
+    return await this.gestorTService.actualizarGestor(updateGestorT);
   }
 }

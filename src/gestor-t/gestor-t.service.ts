@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { GestorTDto } from './dto/gestor-t.dto';
+import { GestorTDto, UpdateGestorTDto } from './dto/gestor-t.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Gestor } from './schema/gestor-t.schema';
 import { Model } from 'mongoose';
@@ -190,5 +190,33 @@ export class GestorTService {
       }
     }
     return false;
+  }
+
+  async actualizarGestor(updateGestorT: UpdateGestorTDto) {
+    return await this.gestorTModel
+      .findOneAndUpdate(
+        { ficha: updateGestorT.ficha },
+        { competencias: updateGestorT.competencias },
+      )
+      .then((gestor) => {
+        return gestor != null
+          ? {
+              error: false,
+              message: 'Tiempos de la ficha actualizados',
+              ex: null,
+            }
+          : {
+              error: true,
+              message: 'No se pudieron actualizar los tiempos de la ficha',
+              ex: gestor,
+            };
+      })
+      .catch((error) => {
+        return {
+          error: true,
+          message: 'Ocurrió un problema actualizando los tiempos de la ficha',
+          ex: error,
+        };
+      });
   }
 }

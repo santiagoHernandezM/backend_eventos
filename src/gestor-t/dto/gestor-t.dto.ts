@@ -16,3 +16,13 @@ export class GestorTDto {
   @IsNotEmpty({ message: 'Las competencias no pueden estar vacías' })
   readonly competencias: competenciaDto[];
 }
+
+export class UpdateGestorTDto {
+  @IsMongoId()
+  @IsNotEmpty({ message: 'El id de la ficha no puede estar vacío' })
+  readonly ficha: string;
+
+  @IsArray()
+  @IsNotEmpty({ message: 'Las competencias no pueden estar vacías' })
+  readonly competencias: competenciaDto[];
+}

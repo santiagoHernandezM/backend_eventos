@@ -18,6 +18,7 @@ import { EmailService } from 'src/email/email.service';
 import { JwtService } from '@nestjs/jwt';
 import { IncomingHttpHeaders } from 'http';
 import { NewPasswordDto } from './dto/new-password.dto';
+import { FichaService } from 'src/ficha/ficha.service';
 
 @Injectable()
 export class UsersService {
@@ -354,7 +355,7 @@ export class UsersService {
     });
   }
 
-  async   forgotPassword(createEmailDto: CreateEmailDto) {
+  async forgotPassword(createEmailDto: CreateEmailDto) {
     const { email } = createEmailDto;
     const usuario = await this.userModel.findOne({ correo: email });
 
