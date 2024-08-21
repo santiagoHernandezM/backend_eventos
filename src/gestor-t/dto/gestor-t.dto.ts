@@ -1,4 +1,4 @@
-import { IsArray, IsMongoId, IsNotEmpty } from 'class-validator';
+import { IsArray, IsMongoId, IsNotEmpty, IsNumber } from 'class-validator';
 import { competenciaDto } from './competencia.dto';
 
 export class GestorTDto {
@@ -25,4 +25,7 @@ export class UpdateGestorTDto {
   @IsArray()
   @IsNotEmpty({ message: 'Las competencias no pueden estar vacías' })
   readonly competencias: competenciaDto[];
+
+  @IsNumber()
+  readonly acumulado_ficha: number; //Acumulado de la ficha(suma de todos los acumulados de las competencias)
 }

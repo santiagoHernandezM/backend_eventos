@@ -196,7 +196,10 @@ export class GestorTService {
     return await this.gestorTModel
       .findOneAndUpdate(
         { ficha: updateGestorT.ficha },
-        { competencias: updateGestorT.competencias },
+        {
+          competencias: updateGestorT.competencias,
+          acumulado: updateGestorT.acumulado_ficha,
+        },
       )
       .then((gestor) => {
         return gestor != null
