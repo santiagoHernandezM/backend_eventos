@@ -15,8 +15,10 @@ import {
   eliminarEventoEspecificoDto,
 } from './dto/eliminarEvento.dto';
 import { GestorAmbienteService } from 'src/gestor-ambiente/gestor-ambiente.service';
-import * as moment from 'moment';
 import { GestorHorasFichaService } from 'src/gestor-horas-ficha/gestor-horas-ficha.service';
+
+import * as moment from 'moment-timezone';
+import { ReporteMesesDto } from 'src/gestor-horas-ficha/dto/reporteHoras.dto';
 
 @Injectable()
 export class EventoService {
@@ -35,22 +37,19 @@ export class EventoService {
 
   async crearEvento(evento: eventoDto) {
     // * Obtenemos las condiciones de consulta para los eventos existentes
-    const mesConsulta = evento.mes;
-    const yearConsulta = evento.year;
 
-    const condicionesConsulta = {
-      mes: mesConsulta,
-      year: yearConsulta,
-      $and: evento.eventos.map((evento) => ({
-        'eventos.ambiente.ambiente': evento.ambiente.ambiente,
-        'eventos.horario': evento.horario,
-        'eventos.diastrabajados': { $in: evento.diastrabajados },
-      })),
-    };
-
+    const condicionesConsulta = evento.eventos.map((mes) => {
+      return {
+        mes: mes.mes,
+        year: mes.year,
+        'eventos.ambiente.ambiente': mes.ambiente.ambiente,
+        'eventos.horario': mes.horario,
+        'eventos.diastrabajados': { $in: mes.diastrabajados },
+      };
+    });
     // * Consulta de eventos existentes
     const eventosEncontrados = await this.eventoModel
-      .find(condicionesConsulta)
+      .find({ $or: condicionesConsulta })
       .exec();
 
     if (eventosEncontrados.length > 0) {
@@ -78,9 +77,9 @@ export class EventoService {
                   eventoReportado.ambiente.ambiente
                 } con horario ${
                   eventoReportado.horario
-                } para los días ${diaConnflicto.join(
-                  ', ',
-                )} del mes ${mesConsulta} de ${yearConsulta}`,
+                } para los días ${diaConnflicto.join(', ')} del mes ${
+                  eventosAReportar.mes
+                } de ${eventosAReportar.year}`,
               });
             }
           });
@@ -114,57 +113,118 @@ export class EventoService {
     //['2684','2684','123']
     let codigos = evento.eventos.flatMap((evento) => evento.ficha.codigo);
     codigos = [...new Set(codigos)];
-
-    const reporte = codigos.map((cod) => {
-      const suma = evento.eventos.reduce((suma, e) => {
-        return e.ficha.codigo == cod ? suma + e.horas : suma;
-      }, 0);
-      return {
-        codigo_ficha: cod,
-        horas: suma,
-      };
+    //[{codigo_ficha, meses:[{mes:1, horas:2}]}]
+    const reporteFichas: ReporteMesesDto[] = [];
+    codigos.forEach((cod) => {
+      const indexReporte = reporteFichas.findIndex(
+        (r) => r.codigo_ficha == cod,
+      );
+      //No se ha guardado el reporte de horas para la ficha
+      if (indexReporte == -1) {
+        const eventosCod = evento.eventos.filter(
+          (ev) => ev.ficha.codigo == cod,
+        );
+        if (eventosCod.length > 0) {
+          //{codigo_ficha, meses[]{mes:1, horas: 12}}
+          const repor: ReporteMesesDto = { codigo_ficha: cod, meses: [] };
+          eventosCod.forEach((ev) => {
+            const indexMes = repor.meses.findIndex((mes) => mes.mes == ev.mes);
+            indexMes == -1
+              ? repor.meses.push({ mes: ev.mes, horas: ev.horas })
+              : (repor.meses[indexMes].horas += ev.horas);
+          });
+          reporteFichas.push(repor);
+        }
+      }
     });
 
-    // [{codigo_ficha, horas}]
+    /* {
+      reporte: [{ codigo_ficha: 123, meses: [{ mes: 1, horas: 120 }] }];
+      year: 2022;
+      id_instructor: '2684';
+    } */
+    const now = moment().tz('America/Bogota');
     await this.gestorHorasFichaService.actualizarHorasInstructor({
-      reporte,
-      mes: evento.mes,
-      year: evento.year,
+      reporte: reporteFichas,
+      year: now.year(),
       id_instructor: evento.instructor,
     });
 
-    const registroEventoExistente = await this.eventoModel.find({
-      mes: evento.mes,
-      year: evento.year,
+    const busquedaInstructor = evento.eventos.map((ev) => ({
+      mes: ev.mes,
+      year: ev.year,
       instructor: evento.instructor,
+    }));
+    const registrosEventoExistente = await this.eventoModel.find({
+      $or: busquedaInstructor,
     });
 
-    if (registroEventoExistente.length === 0) {
-      const createdEvento = new this.eventoModel(evento);
-      await createdEvento.save();
-      return {
-        statusCode: HttpStatus.CREATED,
-        message: createdEvento,
-        messageGestor: respGestor,
-      };
-    } else {
-      evento.eventos.forEach((evento) => {
-        registroEventoExistente[0].eventos.push(evento);
-      });
-      const eventoActualizado = await this.eventoModel
-        .findByIdAndUpdate(
-          registroEventoExistente[0]._id,
-          registroEventoExistente[0],
-        )
-        .exec();
+    const eventosCrear = [];
+    if (registrosEventoExistente.length === 0) {
+      //[{mes:1, year:2002, instructor:12h2h1v223tsvhg347hb, eventos:[] }]
 
-      return {
-        isUpdated: true,
-        statusCode: HttpStatus.CREATED,
-        message: eventoActualizado,
-        messageGestor: respGestor,
-      };
+      evento.eventos.forEach((ev) => {
+        const indexMes = eventosCrear.findIndex((e) => e.mes == ev.mes);
+        const copia_e = { ...ev };
+        delete copia_e.mes;
+        delete copia_e.year;
+        indexMes > -1
+          ? eventosCrear[indexMes].eventos.push(copia_e)
+          : eventosCrear.push({
+              mes: ev.mes,
+              year: ev.year,
+              instructor: evento.instructor,
+              eventos: [copia_e],
+            });
+      });
+    } else {
+      //Hay un evento que ya tiene documento, pero puede que hayan eventos que no tengan documentos creados
+      //Filtro para guardar donde corresponda
+      evento.eventos.forEach((ev) => {
+        const indexEvento = registrosEventoExistente.findIndex(
+          (reg) => reg.mes == ev.mes && reg.year == ev.year,
+        );
+        const copia_e = { ...ev };
+        delete copia_e.mes;
+        delete copia_e.year;
+        //Existe, toca actualizar
+        if (indexEvento > -1) {
+          registrosEventoExistente[indexEvento].eventos.push(copia_e);
+        } else {
+          const indexEventoCrear = eventosCrear.findIndex(
+            (ev_crear) => ev_crear.mes == ev.mes && ev_crear.year == ev.year,
+          );
+          indexEventoCrear > -1
+            ? eventosCrear[indexEventoCrear].eventos.push(copia_e)
+            : eventosCrear.push({
+                mes: ev.mes,
+                year: ev.year,
+                instructor: evento.instructor,
+                eventos: [copia_e],
+              });
+        }
+      });
     }
+    //Colecciones a crear
+    if (eventosCrear.length > 0) {
+      await this.eventoModel.insertMany(eventosCrear);
+    }
+
+    //Colecciones a actualizar
+    if (registrosEventoExistente.length > 0) {
+      for await (const ev of registrosEventoExistente) {
+        await this.eventoModel.findByIdAndUpdate(ev._id, ev).exec();
+      }
+    }
+    return {
+      isUpdated: registrosEventoExistente.length > 0,
+      statusCode: HttpStatus.OK,
+      message: {
+        eventos_update: registrosEventoExistente,
+        eventos_create: eventosCrear,
+      },
+      messageGestor: respGestor,
+    };
   }
 
   async obtenerEventosPorFecha(
@@ -461,23 +521,25 @@ export class EventoService {
 
     await this.gestorAmbienteService.restarHorarioAmbiente(eventoEspecificoDto); // Aqui
 
-    const monthSearch = moment().month() + 1;
-    const eventos = await this.eventoModel
-      .findOne({ mes: monthSearch, instructor: eventoEspecificoDto.instructor })
+    const evento = await this.eventoModel
+      .findOne({
+        mes: eventoEspecificoDto.mes,
+        year: eventoEspecificoDto.year,
+        instructor: eventoEspecificoDto.instructor,
+      })
       .exec();
-
-    const eventoEliminado = eventos.eventos.splice(
+    const eventoEliminado = evento.eventos.splice(
       eventoEspecificoDto.eventIndex,
       1,
     )[0];
 
-    await eventos.save();
+    await evento.save();
     await this.gestorHorasFichaService.restarHorasInstructorFicha({
       codigo_ficha: eventoEspecificoDto.evento.ficha.codigo,
       horas: eventoEspecificoDto.evento.horas,
       id_instructor: eventoEspecificoDto.instructor,
-      mes: monthSearch,
-      year: eventos.year,
+      mes: evento.mes,
+      year: evento.year,
     });
     return eventoEliminado;
   }

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { eventosDto } from '../dto/eventos.dto';
+import { EventosModelDto } from '../dto/eventos.dto';
 import { User } from 'src/users/schema/user.schema';
 
 export type EventoDocument = HydratedDocument<Evento>;
@@ -17,6 +17,6 @@ export class Evento {
   instructor: User;
 
   @Prop({ required: true })
-  eventos: eventosDto[];
+  eventos: EventosModelDto[];
 }
 export const EventoSchema = SchemaFactory.createForClass(Evento);

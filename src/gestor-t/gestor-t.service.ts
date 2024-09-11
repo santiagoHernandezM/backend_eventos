@@ -8,6 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Gestor } from './schema/gestor-t.schema';
 import { Model } from 'mongoose';
 import { RestarTiempoFichaDto } from './dto/restarTiempoFicha.dto';
+import { eventoDto } from 'src/evento/dto/evento.dto';
 
 @Injectable()
 export class GestorTService {
@@ -50,9 +51,9 @@ export class GestorTService {
    * @param registroEventos Recibe un objeto con los eventos a registrar en el gestor de tiempo
    * @returns Retorna un array con los resultados de la actualización de los gestores de tiempo
    */
-  async actualizarTiempos(registroEventos): Promise<any> {
+  async actualizarTiempos(registroEventos: eventoDto): Promise<any> {
     const response = await Promise.all(
-      registroEventos.eventos.map(async (evento) => {
+      registroEventos.eventos.map(async (evento, index) => {
         const comp = await this.gestorTModel.findOne({
           'competencias.codigo': evento.competencia.codigo,
         });
@@ -90,7 +91,7 @@ export class GestorTService {
           .then(() => {
             return {
               actualizado: true,
-              indexEvento: evento.index,
+              indexEvento: index,
               competencia: evento.competencia.competencia,
               ordenResultado: evento.resultado.orden,
               horasAgregadas: evento.horas,
@@ -100,7 +101,7 @@ export class GestorTService {
           .catch((err) => {
             return {
               actualizado: false,
-              indexEvento: evento.index,
+              indexEvento: index,
               competencia: evento.competencia.competencia,
               ordenResultado: evento.resultado.orden,
               horasAgregadas: evento.horas,

@@ -79,72 +79,66 @@ export class GestorHorasFichaService {
         codigo_ficha: { $in: codigosFicha },
       });
       if (gestores.length > 0) {
-        gestores.map(async (gestor) => {
-          //Si el mes está creado
-          const index = gestor.meses.findIndex(
-            (m) => m.mes === reporteHoras.mes,
+        reporteHoras.reporte.forEach(async (reporte) => {
+          //Buscamos el index del gestor
+          const indexGestor = gestores.findIndex(
+            (gestor) => gestor.codigo_ficha == reporte.codigo_ficha,
           );
-
-          const horasSumar = reporteHoras.reporte.find(
-            (repor) => repor.codigo_ficha == gestor.codigo_ficha,
-          );
-
-          if (index > -1) {
-            const regInstructor = gestor.meses[index].instructores.findIndex(
-              (inst) => inst.documento == instructor.documento,
-            );
-            if (regInstructor > -1) {
-              gestor.meses[index].instructores[regInstructor].horas +=
-                horasSumar.horas;
-
-              await this.gestorHorasFichaModel.findOneAndUpdate(
-                { _id: gestor._id },
-                {
-                  meses: gestor.meses,
-                },
+          if (indexGestor > -1) {
+            reporte.meses.forEach((reporteMes) => {
+              //Verificamos si el mes está creado
+              const indexMes = gestores[indexGestor].meses.findIndex(
+                (mes) => mes.mes == reporteMes.mes,
               );
-
-              return 'Horas actualizadas correctamente';
-            } else {
-              gestor.meses[index].instructores.push({
-                documento: instructor.documento,
-                nombre: instructor.nombre,
-                apellido: instructor.apellido,
-                horas: horasSumar.horas,
-                tipoVinculacion: instructor.contrato.tipoVinculacion,
-              });
-              await this.gestorHorasFichaModel.findOneAndUpdate(
-                { _id: gestor._id },
-                {
-                  meses: gestor.meses,
-                },
-              );
-              return 'Horas añadidas correctamente';
-            }
-          } else {
-            gestor.meses.push({
-              mes: reporteHoras.mes,
-              instructores: [
-                {
-                  documento: instructor.documento,
-                  nombre: instructor.nombre,
-                  apellido: instructor.apellido,
-                  horas: horasSumar.horas,
-                  tipoVinculacion: instructor.contrato.tipoVinculacion,
-                },
-              ],
+              if (indexMes > -1) {
+                //Verificamos si el instructor está creado
+                const indexInstructor = gestores[indexGestor].meses[
+                  indexMes
+                ].instructores.findIndex(
+                  (inst) => inst.documento == instructor.documento,
+                );
+                if (indexInstructor > -1) {
+                  gestores[indexGestor].meses[indexMes].instructores[
+                    indexInstructor
+                  ].horas += reporteMes.horas;
+                } else {
+                  //No existe el instructor, toca crearlo instructor
+                  gestores[indexGestor].meses[indexMes].instructores.push({
+                    documento: instructor.documento,
+                    nombre: instructor.nombre,
+                    apellido: instructor.apellido,
+                    horas: reporteMes.horas,
+                    tipoVinculacion: instructor.contrato.tipoVinculacion,
+                  });
+                }
+              } else {
+                //No existe el mes, toca crearlo
+                gestores[indexGestor].meses.push({
+                  mes: reporteMes.mes,
+                  instructores: [
+                    {
+                      documento: instructor.documento,
+                      nombre: instructor.nombre,
+                      apellido: instructor.apellido,
+                      horas: reporteMes.horas,
+                      tipoVinculacion: instructor.contrato.tipoVinculacion,
+                    },
+                  ],
+                });
+              }
             });
-            await this.gestorHorasFichaModel.findOneAndUpdate(
-              { _id: gestor._id },
-              {
-                meses: gestor.meses,
-              },
-            );
-            return 'Instructor creado y sus horas actualizadas correctamente';
           }
         });
+        //Actualizamos los gestores
+        for await (const gestor of gestores) {
+          await this.gestorHorasFichaModel.findOneAndUpdate(
+            { codigo_ficha: gestor.codigo_ficha },
+            gestor,
+          );
+        }
+        return 'Horas actualizadas correctamente';
       }
-      return 'El gestor de horas para la ficha no existe';
+      return 'No se encontraron los gestores de las fichas';
     }
     return 'El instructor no existe';
   }
@@ -189,7 +183,7 @@ export class GestorHorasFichaService {
     }
     return 'El instructor no existe';
   }
-  
+
   update(id: number, updateGestorHorasFichaDto: UpdateGestorHorasFichaDto) {
     return `This action updates a #${id} gestorHorasFicha`;
   }

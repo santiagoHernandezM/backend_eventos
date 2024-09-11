@@ -8,7 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 import { number } from 'joi';
-import { eventosDto } from './eventos.dto';
+import { EventosModelDto } from './eventos.dto';
 
 export class eliminarEventoDto {
   @ApiProperty({
@@ -87,11 +87,11 @@ export class eliminarEventoEspecificoDto {
   readonly instructor: string;
 
   @ApiProperty({
-    type: eventosDto,
+    type: EventosModelDto,
   })
   @IsNotEmpty()
   @IsObject()
-  readonly evento: eventosDto;
+  readonly evento: EventosModelDto;
 
   @ApiProperty({
     type: Number,
@@ -101,4 +101,20 @@ export class eliminarEventoEspecificoDto {
   @IsNotEmpty()
   @IsNumber()
   readonly eventIndex: number;
+
+  @ApiProperty({
+    type: Number,
+    description: 'Año del evento',
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  readonly year: number;
+
+  @ApiProperty({
+    type: Number,
+    description: 'Mes del evento',
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  readonly mes: number;
 }

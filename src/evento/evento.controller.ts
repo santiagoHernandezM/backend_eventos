@@ -105,8 +105,12 @@ export class EventoController {
   }
 
   @Get(':mes/:ano/:programaId')
-  findAllByProgramaIdAndMonthAndYear(@Param('programaId') programaIds: string, @Param('mes') mes: number, @Param('ano') year: number) {
+  findAllByProgramaIdAndMonthAndYear(
+    @Param('programaId') programaIds: string,
+    @Param('mes') mes: number,
+    @Param('ano') year: number,
+  ) {
     const ids = programaIds.split(',');
-    return this.eventoService.getEventosByProgrmasMesAnio(mes, year,ids);
+    return this.eventoService.getEventosByProgrmasMesAnio(mes, year, ids);
   }
 }

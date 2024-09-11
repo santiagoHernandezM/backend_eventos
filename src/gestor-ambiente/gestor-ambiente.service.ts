@@ -7,7 +7,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { GestorAmbiente } from './schema/gestor-ambiente.schema';
 import { Model } from 'mongoose';
-import { eventosDto } from 'src/evento/dto/eventos.dto';
+import { EventosModelDto } from 'src/evento/dto/eventos.dto';
 import { eliminarEventoEspecificoDto } from 'src/evento/dto/eliminarEvento.dto';
 import { SedesService } from 'src/sedes/sedes.service';
 import {
@@ -118,7 +118,7 @@ export class GestorAmbienteService {
     }
   }
 
-  async actualizarAmbiente(evento: eventosDto[], instructor: string) {
+  async actualizarAmbiente(evento: EventosModelDto[], instructor: string) {
     let indexAmbiente: number;
     let horario: string;
     await Promise.all(

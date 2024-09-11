@@ -2,10 +2,7 @@ import { IsArray, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class ReporteHorasDto {
   @IsArray()
-  reporte: ReporteDto[];
-
-  @IsNumber()
-  mes: number;
+  reporte: ReporteMesesDto[];
 
   @IsNumber()
   year: number;
@@ -14,9 +11,16 @@ export class ReporteHorasDto {
   id_instructor: string;
 }
 
-export class ReporteDto {
+export class ReporteMesesDto {
   @IsNotEmpty()
   codigo_ficha: string;
+
+  @IsArray()
+  meses: ReporteMesDto[];
+}
+export class ReporteMesDto {
+  @IsNumber()
+  mes: number;
 
   @IsNumber()
   horas: number;
