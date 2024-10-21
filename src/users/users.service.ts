@@ -166,6 +166,10 @@ export class UsersService {
     );
   }
 
+  async getInstructoresByDocumento(documentos: string[]) {
+    return await this.userModel.find({ documento: { $in: documentos } });
+  }
+
   async obtenerInstructores() {
     return await this.userModel
       .find({ roles: { $in: 'Instructor' } })

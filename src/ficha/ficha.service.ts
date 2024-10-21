@@ -80,11 +80,11 @@ export class FichaService {
 
   async crearFicha(fichaDto: FichaDto) {
     let gestor;
-    return await this.fichaModel.create(fichaDto).then((fichaCreada) => {
-      return this.competenciaService
+    return await this.fichaModel.create(fichaDto).then(async (fichaCreada) => {
+      return await this.competenciaService
         .obtenerCompetenciasPorPrograma(fichaDto.programa)
-        .then((competenciasM: any) => {
-          return this.programaService
+        .then(async(competenciasM: any) => {
+          return await this.programaService
             .obtenerDuracion(fichaDto.programa)
             .then(async (duracion) => {
               gestor = {
@@ -370,5 +370,9 @@ export class FichaService {
         .select(['_id', 'codigo', 'programa']);
     }
     return [];
+  }
+
+  async getFichasByCodigos(codigos: string[]) {
+    return await this.fichaModel.find({ codigo: { $in: codigos } });
   }
 }

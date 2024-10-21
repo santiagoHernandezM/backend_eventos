@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Sede } from './schema/sede.schema';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { ActualizarSedeDto, SedeDto } from './dto/sedes.dto';
 import { Bloque } from 'src/bloque/schema/bloque.schema';
 import { Ambiente } from 'src/ambiente/schemas/ambiente.schema';
@@ -40,7 +40,7 @@ export class SedesService {
   async getSede(sede: string): Promise<Sede> {
     return await this.SedesModel.findOne({ _id: sede });
   }
-  
+
   async crearSede(sedeDto: SedeDto): Promise<NotFoundException | Sede> {
     const sedes = new this.SedesModel(sedeDto);
     return await sedes.save().then(async (sede) => {
@@ -103,5 +103,11 @@ export class SedesService {
           path: 'regional',
         },
       });
+  }
+
+  async getSedesPorCentros(centros: string[]) {
+    return await this.SedesModel.find({
+      centro: { $in: centros },
+    });
   }
 }

@@ -93,4 +93,8 @@ export class AmbienteService {
       .populate('bloque')
       .populate('sede');
   }
+
+  async getAmbientesBySedes(sedes: string[]) {
+    return await this.ambienteModel.find({ sede: { $in: sedes } });
+  }
 }

@@ -121,4 +121,10 @@ export class CentroService {
       })
       .populate('regional');
   }
+
+  async getCentrosByMunicipio(municipios: string[]) {
+    return await this.centroModel.find({
+      municipio: { $in: municipios },
+    });
+  }
 }

@@ -98,4 +98,22 @@ export class CargueMasivoCompetenciasController {
     const result = await this.cargue.processProgramas(file);
     return result;
   }
+
+  @Post('/cargarfichas')
+  @UseInterceptors(
+    FileInterceptor('fichas', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = file.originalname.split('.');
+          cb(null, `${file.fieldname}-${uniqueSuffix}.${ext[ext.length - 1]}`);
+        },
+      }),
+    }),
+  )
+  async uploadFileFichas(@UploadedFile() fichas: Express.Multer.File) {
+    return await this.cargue.processFichas(fichas);
+  }
 }

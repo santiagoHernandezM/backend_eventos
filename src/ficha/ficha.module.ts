@@ -26,6 +26,6 @@ import { User, UserSchema } from 'src/users/schema/user.schema';
   ],
   controllers: [FichaController],
   providers: [FichaService, GestorHorasFichaService],
-  exports: [MongooseModule],
+  exports: [MongooseModule, FichaService],
 })
 export class FichaModule {}
