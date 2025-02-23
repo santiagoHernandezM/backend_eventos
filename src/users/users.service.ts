@@ -62,6 +62,7 @@ export class UsersService {
           $match: {
             $and: [
               { _id: { $ne: coordinador._id } },
+              { roles: { $nin: ['Coordinador','Administrator'] } },
               { programas: { $exists: true, $in: coordinador.programas } },
             ],
           },

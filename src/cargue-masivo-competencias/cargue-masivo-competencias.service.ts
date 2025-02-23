@@ -122,7 +122,7 @@ export class CargueMasivoCompetenciasService {
         const fe2 = tf2[0].substring(1, tf1[0].length);
 
         const instructor = {
-          documento: columna['A'], //Código de la competencia en la Columna A del excel
+          documento: columna['A'].toString(), //Código de la competencia en la Columna A del excel
           nombre: columna['B'], //Nombre de la competencia en la Co password:
           apellido: columna['C'],
           correo: columna['D'],
@@ -166,6 +166,7 @@ export class CargueMasivoCompetenciasService {
         rows: 1, //Omitimos la primera fila que es de los titulos de las columnas
       },
     });
+    fs.unlinkSync(fichas.path);
     const datosExcel: any[] = Object.values(fichasJson);
     //Validamos que solo sea una hoja en el excel
     const resp = {
@@ -176,6 +177,7 @@ export class CargueMasivoCompetenciasService {
       fichas_no_creadas: 0,
       dev: [],
     };
+    let programasExistentes;
     if (datosExcel.length > 0) {
       let fichasCrear = [],
         instRelacionar = [],
@@ -200,7 +202,7 @@ export class CargueMasivoCompetenciasService {
         await this.fichaService.getFichasByCodigos(fichasCrear);
       const instructoresExistentes =
         await this.usersService.getInstructoresByDocumento(instRelacionar);
-      const programasExistentes = await this.programaModel.find({
+      programasExistentes = await this.programaModel.find({
         codigo: { $in: progRelacionar },
       });
       const centrosExistentes =
@@ -228,9 +230,12 @@ export class CargueMasivoCompetenciasService {
                  * H: Version programa
                  * I: Nombre Programa de formación
                  * J: Municipio para escoger sede de la ejecución de la ficha
-                 * K: Dias de formación, formato DIA horainicio horafin, DIA horainicio horafin...
+                 * K: Ambiente(Opcional)
+                 * L: Dias de formación, formato DIA horainicio horafin,DIA horainicio horafin...
                  * El Ambiente de ejecución(se coloca uno por defecto para la sede escogida)
                  */
+                console.log('Cant hojas:', datosExcel.length);
+
                 for (let i = 0; i < datosExcel.length; i++) {
                   const hoja = datosExcel[i];
                   for (let j = 0; j < hoja.length; j++) {
@@ -243,12 +248,22 @@ export class CargueMasivoCompetenciasService {
                       );
                       if (instructor != undefined) {
                         const programa = programasExistentes.find(
-                          (prog) => prog.codigo === hoja[j]['G'].toString(),
+                          (prog: any) =>
+                            prog.codigo === hoja[j]['G'].toString(),
                         );
                         if (programa != undefined) {
-                          const centroFicha = centrosExistentes.find(
+                          let centroFicha: any = centrosExistentes.find(
                             (centro) => centro.municipio == hoja[j]['J'],
                           );
+                          if (centroFicha == undefined) {
+                            centroFicha = sedes.find(
+                              (sede) => sede.municipio == hoja[j]['J'],
+                            );
+                            centroFicha =
+                              centroFicha != undefined
+                                ? centroFicha.centro
+                                : undefined;
+                          }
                           if (centroFicha) {
                             const sedesCentro = sedes.filter(
                               (sede) =>
@@ -257,142 +272,218 @@ export class CargueMasivoCompetenciasService {
                             if (sedesCentro.length > 0) {
                               //Escojo por defecto la primera sede para crear la ficha
 
-                              const sedeFicha = sedesCentro[0];
-                              const ambientesSede = ambientes.filter(
-                                (ambiente) =>
-                                  ambiente.sede.toString() == sedeFicha.id,
+                              const sedeFicha = sedesCentro.find(
+                                (sede) => sede.municipio == hoja[j]['J'],
                               );
-                              if (ambientesSede.length > 0) {
-                                let indexAmbiente = 0;
-                                if (ambientesSede.length > 1) {
-                                  indexAmbiente = Math.floor(
-                                    Math.random() * ambientesSede.length,
-                                  );
-                                }
-                                //Armar jornada
-                                const jornadas = [];
-                                const dias = hoja[j]['K'].split(',');
-                                let error_dias = false;
-                                for (let k = 0; k < dias.length; k++) {
-                                  let splitDia = dias[k].split(' ');
-                                  if (splitDia.length >= 3) {
-                                    //Puede que tenga espacios en blanco
-                                    //Eliminamos los espacios en blanco o item sin nada
-                                    splitDia = splitDia.filter(
-                                      (item: string) => item.trim() !== '',
-                                    );
-                                    if (splitDia.length == 3) {
-                                      let dia = splitDia[0];
-                                      switch (dia) {
-                                        case 'MIERCOLES':
-                                          dia = 'MIÉRCOLES';
-                                          break;
+                              if (sedeFicha != undefined) {
+                                const ambientesSede = ambientes.filter(
+                                  (ambiente) =>
+                                    ambiente.sede.toString() == sedeFicha.id,
+                                );
+                                console.log('Ambientes sede:', ambientesSede);
 
-                                        case 'SABADO':
-                                          dia = 'SÁBADO';
-                                          break;
-                                      }
-                                      const horainicio = splitDia[1];
-                                      const horafin = splitDia[2];
-                                      //Validar formato horas
-                                      const solo_horainicio = parseInt(
-                                        horainicio.split(':')[0],
-                                      );
+                                if (ambientesSede.length > 0) {
+                                  let indexAmbiente = 0;
+                                  let ambienteExcel = hoja[j]['K'];
 
-                                      let solo_horafin_min = horafin.split(':');
-                                      solo_horafin_min[0] = parseInt(
-                                        solo_horafin_min[0],
+                                  if (ambientesSede.length > 1) {
+                                    if (
+                                      ambienteExcel != undefined &&
+                                      ambienteExcel != null
+                                    ) {
+                                      ambienteExcel = ambienteExcel.replace(
+                                        /\s+/g,
+                                        '',
                                       );
-                                      if (parseInt(solo_horafin_min[1]) == 59) {
-                                        solo_horafin_min[0]++; //Aumentamos 1 hora más
-                                        solo_horafin_min[1] = '00';
+                                      indexAmbiente = ambientesSede.findIndex(
+                                        (a) =>
+                                          `${a.bloque}-${a.codigo}` ==
+                                          ambienteExcel,
+                                      );
+                                    }
+                                    indexAmbiente =
+                                      indexAmbiente == -1
+                                        ? Math.floor(
+                                            Math.random() *
+                                              ambientesSede.length,
+                                          )
+                                        : indexAmbiente;
+                                  }
+                                  //Armar jornada
+                                  const jornadas = [];
+                                  const dias = hoja[j]['L'].split(',');
+                                  let error_dias = false;
+                                  for (let k = 0; k < dias.length; k++) {
+                                    let splitDia = dias[k].split(' ');
+                                    if (splitDia.length >= 3) {
+                                      //Puede que tenga espacios en blanco
+                                      //Eliminamos los espacios en blanco o item sin nada
+                                      splitDia = splitDia.filter(
+                                        (item: string) => item.trim() !== '',
+                                      );
+                                      if (splitDia.length == 3) {
+                                        let dia = splitDia[0];
+                                        switch (dia) {
+                                          case 'MIERCOLES':
+                                            dia = 'MIÉRCOLES';
+                                            break;
+
+                                          case 'SABADO':
+                                            dia = 'SÁBADO';
+                                            break;
+                                        }
+                                        const horainicio = splitDia[1];
+                                        const horafin = splitDia[2];
+                                        //Validar formato horas
+                                        const solo_horainicio = parseInt(
+                                          horainicio.split(':')[0],
+                                        );
+
+                                        let solo_horafin_min =
+                                          horafin.split(':');
+                                        solo_horafin_min[0] = parseInt(
+                                          solo_horafin_min[0],
+                                        );
+                                        if (
+                                          parseInt(solo_horafin_min[1]) == 59
+                                        ) {
+                                          solo_horafin_min[0]++; //Aumentamos 1 hora más
+                                          solo_horafin_min[1] = '00';
+                                        }
+                                        let horainicio_horafin = `${solo_horainicio}-${solo_horafin_min[0]}`;
+
+                                        if (
+                                          horainicio_horafin == '6-14' ||
+                                          horainicio_horafin == '12-20'
+                                        ) {
+                                          //Resto las 2 horas solo en la jornada de la mañana y tarde
+                                          solo_horafin_min[0] =
+                                            solo_horafin_min[0] - 2;
+                                          horainicio_horafin = `${solo_horainicio}-${solo_horafin_min[0]}`;
+                                        }
+                                        /*Verifico que jornada es
+                                         * 6-12 : Mañana (Sumar las 8 horas)
+                                         * 12-18: Tarde (Sumar las 8 horas)
+                                         * 18-22: Noche (Sumar solo 4 horas)
+                                         * 6-20, 6-22: Mixta (El rango debe ser la intensidad_horaria)
+                                         * 16-22: Mixta (solo se deben sumar 6 horas)
+                                         */
+                                        let jornada = 'Mañana';
+                                        if (horainicio_horafin == '12-18') {
+                                          jornada = 'Tarde';
+                                        } else if (
+                                          horainicio_horafin == '18-22'
+                                        ) {
+                                          jornada = 'Noche';
+                                        } else if (
+                                          horainicio_horafin == '6-20' ||
+                                          horainicio_horafin == '6-22' ||
+                                          horainicio_horafin == '16-22' ||
+                                          horainicio_horafin == '16-20' ||
+                                          horainicio_horafin == '14-20' ||
+                                          horainicio_horafin == '14-22' ||
+                                          horainicio_horafin == '6-18' ||
+                                          horainicio_horafin == '12-20' ||
+                                          horainicio_horafin == '12-22'
+                                        ) {
+                                          jornada = 'Mixta';
+                                        }
+
+                                        jornadas.push({
+                                          dia,
+                                          jornada,
+                                          horaInicio:
+                                            solo_horainicio.toString(),
+                                          horaFin:
+                                            solo_horafin_min[0].toString(),
+                                        });
+                                      } else {
+                                        error_dias = true;
+                                        break;
                                       }
-                                      let jornada = 'Mañana';
-                                      const horainicio_horafin = `${solo_horainicio}-${solo_horafin_min[0]}`;
-                                      if (
-                                        horainicio_horafin == '12-18' ||
-                                        horainicio_horafin == '12-20'
-                                      ) {
-                                        jornada = 'Tarde';
-                                      } else if (
-                                        horainicio_horafin == '20-22' ||
-                                        horainicio_horafin == '18-22'
-                                      ) {
-                                        jornada = 'Noche';
-                                      } else if (
-                                        horainicio_horafin == '6-20' ||
-                                        horainicio_horafin == '6-22' ||
-                                        horainicio_horafin == '8-20' ||
-                                        horainicio_horafin == '8-22' ||
-                                        horainicio_horafin == '12-20' ||
-                                        horainicio_horafin == '12-22' ||
-                                        horainicio_horafin == '14-20' ||
-                                        horainicio_horafin == '14-22'
-                                      ) {
-                                        jornada = 'Mixta';
-                                      }
-                                      jornadas.push({
-                                        dia,
-                                        jornada,
-                                        horaInicio: solo_horainicio.toString(),
-                                        horaFin: solo_horafin_min[0].toString(),
-                                      });
                                     } else {
                                       error_dias = true;
                                       break;
                                     }
-                                  } else {
-                                    error_dias = true;
-                                    break;
                                   }
-                                }
-                                if (!error_dias) {
-                                  /*
-                                   * La fecha es invalida cuándo viene en el formato dia/mes/año toca hacerla año/mes/dia
-                                   */
-                                  let fechaInicio = hoja[j]['C'].split('/');
-                                  fechaInicio = `${fechaInicio[2]}/${fechaInicio[1]}/${fechaInicio[0]}`;
-                                  let fechaFin = hoja[j]['D'].split('/');
-                                  fechaFin = `${fechaFin[2]}/${fechaFin[1]}/${fechaFin[0]}`;
-                                  await this.fichaService
-                                    .crearFicha({
-                                      ambiente: ambientesSede[indexAmbiente].id,
-                                      codigo: hoja[j]['A'].toString(),
-                                      fechaInicio,
-                                      fechaFin,
-                                      instructor: instructor.id,
-                                      programa: programa.id,
-                                      sede: sedeFicha.id,
-                                      jornadas,
-                                    })
-                                    .then((r) => {
-                                      if (r != null) {
-                                        resp.fichas_creadas++;
-                                      } else {
+                                  if (!error_dias) {
+                                    /*
+                                     * La fecha es invalida cuándo viene en el formato dia/mes/año toca hacerla año/mes/dia
+                                     */
+                                    let fechaInicio: any = '';
+                                    if (typeof hoja[j]['C'] == 'object') {
+                                      fechaInicio = new Date(hoja[j]['C'])
+                                        .toISOString()
+                                        .split('T')[0];
+                                      fechaInicio = fechaInicio
+                                        .split('-')
+                                        .join('/');
+                                    } else {
+                                      fechaInicio = hoja[j]['C']
+                                        .split('/')
+                                        .reverse()
+                                        .join('/');
+                                    }
+                                    console.log('fecha inicio:', fechaInicio);
+                                    let fechaFin: any = '';
+                                    if (typeof hoja[j]['D'] == 'object') {
+                                      fechaFin = new Date(hoja[j]['D'])
+                                        .toISOString()
+                                        .split('T')[0];
+                                      fechaFin = fechaFin.split('-').join('/');
+                                    } else {
+                                      fechaFin = hoja[j]['D']
+                                        .split('/')
+                                        .reverse()
+                                        .join('/');
+                                    }
+                                    console.log('fecha fin:', fechaFin);
+                                    await this.fichaService
+                                      .crearFicha({
+                                        ambiente:
+                                          ambientesSede[indexAmbiente].id,
+                                        codigo: hoja[j]['A'].toString(),
+                                        fechaInicio,
+                                        fechaFin,
+                                        instructor: instructor.id,
+                                        programa: programa.id,
+                                        sede: sedeFicha.id,
+                                        jornadas,
+                                      })
+                                      .then((r) => {
+                                        if (r != null) {
+                                          resp.fichas_creadas++;
+                                        } else {
+                                          resp.messages.push(
+                                            `No se pudo crear la ficha ${hoja[j]['A']}`,
+                                          );
+                                          resp.fichas_no_creadas++;
+                                          resp.error = true;
+                                        }
+                                      })
+                                      .catch((error) => {
                                         resp.messages.push(
-                                          `No se pudo crear la ficha ${hoja[j]['A']}`,
+                                          `Sucedió un error creando la ficha ${hoja[j]['A']}, error: ${error}`,
                                         );
                                         resp.fichas_no_creadas++;
                                         resp.error = true;
-                                      }
-                                    })
-                                    .catch((error) => {
-                                      resp.messages.push(
-                                        `Sucedió un error creando la ficha ${hoja[j]['A']}, error: ${error}`,
-                                      );
-                                      resp.fichas_no_creadas++;
-                                      resp.error = true;
-                                    });
+                                      });
+                                  } else {
+                                    resp.error = true;
+                                    resp.messages.push(
+                                      `Formato de DIAS de formación incorrecto para la ficha ${hoja[j]['A']}`,
+                                    );
+                                  }
                                 } else {
                                   resp.error = true;
                                   resp.messages.push(
-                                    `Formato de DIAS de formación incorrecto para la ficha ${hoja[j]['A']}`,
+                                    `No hay ambientes para la sede ${sedeFicha.nombre} para crear la ficha ${hoja[j]['A']}`,
                                   );
                                 }
                               } else {
                                 resp.error = true;
                                 resp.messages.push(
-                                  `No hay ambientes para la sede ${sedeFicha.nombre} para crear la ficha ${hoja[j]['A']}`,
+                                  `No existe una sede o centro en ${centroFicha.municipio} para crear la ficha ${hoja[j]['A']}`,
                                 );
                               }
                             } else {
@@ -400,7 +491,6 @@ export class CargueMasivoCompetenciasService {
                               resp.messages.push(
                                 `No existe una sede para el centro: ${centroFicha.id} para crear la ficha ${hoja[j]['A']}`,
                               );
-                              continue;
                             }
                           } else {
                             resp.error = true;
@@ -467,7 +557,6 @@ export class CargueMasivoCompetenciasService {
       resp.messages.push('El excel debe contener solo una hoja');
     }
 
-    fs.unlinkSync(fichas.path);
     return resp;
   }
 }

@@ -83,7 +83,7 @@ export class FichaService {
     return await this.fichaModel.create(fichaDto).then(async (fichaCreada) => {
       return await this.competenciaService
         .obtenerCompetenciasPorPrograma(fichaDto.programa)
-        .then(async(competenciasM: any) => {
+        .then(async (competenciasM: any) => {
           return await this.programaService
             .obtenerDuracion(fichaDto.programa)
             .then(async (duracion) => {
@@ -100,12 +100,20 @@ export class FichaService {
                 });
                 gestor.competencias.push(competencias);
               });
-              await this.gestorTService.crearGestor(gestor);
+              const gestorT = await this.gestorTService.crearGestor(gestor);
               const now = moment(fichaDto.fechaInicio).tz('America/Bogota');
-              await this.gestorHorasFichaService.crearGestorHorasFicha(
-                fichaDto.codigo,
-                now.year(),
+              const gestorHorasFicha =
+                await this.gestorHorasFichaService.crearGestorHorasFicha(
+                  fichaDto.codigo,
+                  now.year(),
+                );
+              console.log(
+                'gestorT:',
+                gestorT,
+                'Gestor horas ficha:',
+                gestorHorasFicha,
               );
+
               return fichaCreada;
             });
         });

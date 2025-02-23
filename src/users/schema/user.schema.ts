@@ -9,7 +9,7 @@ export type UserDocument = HydratedDocument<User>;
 
 @Schema()
 export class User {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   documento: string;
 
   @Prop({ required: true })
@@ -18,7 +18,7 @@ export class User {
   @Prop({ required: true })
   apellido: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   correo: string;
 
   @Prop({ required: true, select: false })

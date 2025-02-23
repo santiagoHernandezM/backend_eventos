@@ -37,20 +37,56 @@ export class EventoService {
 
   async crearEvento(evento: eventoDto) {
     // * Obtenemos las condiciones de consulta para los eventos existentes
+    const horarios = [
+      '6-12',
+      '6-14',
+      '7-13',
+      '7-15',
+      '8-14',
+      '8-16',
+      '9-15',
+      '9-17',
+      '10-16',
+      '10-18',
+      '11-17',
+      '11-19',
+      '12-18',
+      '12-20',
+      '13-19',
+      '13-21',
+      '14-20',
+      '14-22',
+      '15-21',
+      '16-22',
+    ];
 
     const condicionesConsulta = evento.eventos.map((mes) => {
       return {
         mes: mes.mes,
         year: mes.year,
         'eventos.ambiente.ambiente': mes.ambiente.ambiente,
-        'eventos.horario': mes.horario,
+        //'eventos.horario': mes.horario,
         'eventos.diastrabajados': { $in: mes.diastrabajados },
+        eventos: {
+          $elemMatch: {
+            horario: {
+              //12-18, 16-22
+              $in: horarios.filter((h) => {
+                const [hInicio, hFin] = h.split('-').map(Number);
+                const [eInicio, eFin] = mes.horario.split('-').map(Number);
+                return hInicio < eFin && hFin > eInicio; // Verifica si hay intersección
+              }),
+            },
+          },
+        },
       };
     });
     // * Consulta de eventos existentes
     const eventosEncontrados = await this.eventoModel
       .find({ $or: condicionesConsulta })
+      .populate('instructor')
       .exec();
+    console.log('encontrados:', eventosEncontrados);
 
     const mensajeConflict = [];
     const indexEventosConflicto = [];
@@ -80,7 +116,11 @@ export class EventoService {
                   eventoReportado.horario
                 } para los días ${diaConnflicto.join(', ')} del mes ${
                   eventosAReportar.mes
-                } de ${eventosAReportar.year}`,
+                } de ${eventosAReportar.year}, registrado por ${
+                  eventoInstructor.instructor.nombre
+                } ${eventoInstructor.instructor.apellido}: ${
+                  eventoInstructor.instructor.celular
+                }`,
               });
               if (!indexEventosConflicto.includes(indexEventoAReportar)) {
                 indexEventosConflicto.push(indexEventoAReportar);

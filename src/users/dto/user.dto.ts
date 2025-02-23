@@ -13,62 +13,61 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ContratoDto } from './contrato.dto';
 
 export class UserDto {
-  
   @ApiProperty()
   @Matches(/^(?!\s*$).+/, { message: 'El documento no puede ser estar vacío' })
-   documento: string;
+  documento: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @Matches(/^(?!\s*$).+/, { message: 'El nombre no puede ser estar vacío' })
-   nombre: string;
+  nombre: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @Matches(/^(?!\s*$).+/, { message: 'El apellido no puede ser estar vacío' })
-   apellido: string;
+  apellido: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsEmail()
   @IsString()
   @Matches(/^(?!\s*$).+/, { message: 'El correo no puede ser estar vacío' })
-   correo: string;
+  correo: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @Matches(/^(?!\s*$).+/, { message: 'El celular no puede ser estar vacío' })
-   celular: string;
+  celular: string;
 
   @ApiProperty()
   @IsOptional()
-   contrato?: ContratoDto;
+  contrato?: ContratoDto;
 
   @ApiProperty()
   @IsOptional()
   @IsArray()
-   programas: string[];
+  programas: string[];
 
   @ApiProperty()
   @Matches(/^(?!\s*$).+/, { message: 'El centro no puede estar vacía' })
-   centro: string;
+  centro: string;
 
   @IsNotEmpty()
   @IsString()
   @ApiProperty()
   @Length(6, 50)
-  @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+  /* @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message: 'La contraseña debe contener Mayusculas, minusculas y numeros',
-  })
-   password: string;
+  }) */
+  password: string;
 
   @IsArray()
   @ApiProperty()
   @ArrayNotEmpty({ each: false })
-   roles: string[];
+  roles: string[];
 }
 
 export class UserLoginDto {
@@ -90,13 +89,11 @@ export class UserLoginDto {
 }
 
 export class ActualizarUserDto {
-
   @ApiProperty({
     type: String,
     description: 'El ObjectId del usuario',
     default: '12345678',
   })
-  
   @IsMongoId()
   // @IsOptional()
   // @Matches(/^(?!\s*$).+/, { message: 'El Id no puede ser estar vacío' })

@@ -108,6 +108,6 @@ export class SedesService {
   async getSedesPorCentros(centros: string[]) {
     return await this.SedesModel.find({
       centro: { $in: centros },
-    });
+    }).populate('centro');
   }
 }
