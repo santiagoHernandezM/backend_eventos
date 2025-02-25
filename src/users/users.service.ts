@@ -62,7 +62,7 @@ export class UsersService {
           $match: {
             $and: [
               { _id: { $ne: coordinador._id } },
-              { roles: { $nin: ['Coordinador','Administrator'] } },
+              { roles: { $nin: ['Coordinador', 'Administrator'] } },
               { programas: { $exists: true, $in: coordinador.programas } },
             ],
           },
@@ -226,7 +226,8 @@ export class UsersService {
           path: 'regional',
         },
       })
-      .populate('programas');
+      .populate('programas')
+      .sort({ nombre: 'asc' });
   }
 
   async obtenerInstructorPorId(id: string) {
