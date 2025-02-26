@@ -74,7 +74,7 @@ export class EventoService {
               $in: horarios.filter((h) => {
                 const [hInicio, hFin] = h.split('-').map(Number);
                 const [eInicio, eFin] = mes.horario.split('-').map(Number);
-                return hInicio < eFin && hFin > eInicio; // Verifica si hay intersección
+                return hInicio < eFin && hFin > eInicio; // Verifica si hay intersección 12-18 18-22
               }),
             },
           },
@@ -102,10 +102,17 @@ export class EventoService {
                 diaConnflicto.push(diaEspecifico);
               }
             });
+            const [hReportadoInicio, hReportadoFin] = eventoReportado.horario
+              .split('-')
+              .map(Number);
+            const [eAReportarInicio, eAReportarFin] = eventosAReportar.horario
+              .split('-')
+              .map(Number);
             if (
               eventosAReportar.ambiente.ambiente ==
                 eventoReportado.ambiente.ambiente &&
-              eventosAReportar.horario == eventoReportado.horario &&
+              hReportadoInicio < eAReportarFin &&
+              hReportadoFin > eAReportarInicio &&
               repiteDia
             ) {
               mensajeConflict.push({

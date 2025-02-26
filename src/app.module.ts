@@ -23,18 +23,16 @@ import { CargueMasivoCompetenciasModule } from './cargue-masivo-competencias/car
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { JwtModule } from '@nestjs/jwt';
-import configuration from './config/configuration';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailModule } from './email/email.module';
 import { GestorHorasFichaModule } from './gestor-horas-ficha/gestor-horas-ficha.module';
-import { GestorAmbienteService } from './gestor-ambiente/gestor-ambiente.service';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
-      load: [configuration],
+      envFilePath: '.env',
       isGlobal: true,
     }),
     MongooseModule.forRootAsync({
