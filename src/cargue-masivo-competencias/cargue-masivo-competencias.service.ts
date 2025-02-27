@@ -264,11 +264,17 @@ export class CargueMasivoCompetenciasService {
                                 ? centroFicha.centro
                                 : undefined;
                           }
+                          console.log('Centro Ficha:', centroFicha);
+
                           if (centroFicha) {
                             const sedesCentro = sedes.filter(
-                              (sede) =>
-                                sede.centro.toString() == centroFicha.id,
+                              (sede: any) =>
+                                sede.centro._id.toString() ==
+                                centroFicha._id.toString(),
                             );
+                            console.log('sedes:', sedes);
+
+                            console.log('Sedes Centro:', sedesCentro);
                             if (sedesCentro.length > 0) {
                               //Escojo por defecto la primera sede para crear la ficha
 

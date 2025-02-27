@@ -147,4 +147,8 @@ export class ActualizarUserDto {
   @IsOptional()
   @ArrayNotEmpty({ each: false })
   readonly roles: string[];
+
+  @ApiProperty()
+  @IsOptional()
+  password: string;
 }

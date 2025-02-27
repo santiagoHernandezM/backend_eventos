@@ -146,7 +146,23 @@ export class FichaService {
     return await this.fichaModel
       .find({ programa: id })
       .populate('sede')
-      .populate('ambiente')
+      .populate({
+        path: 'ambiente',
+        populate: [
+          {
+            path: 'bloque',
+            populate: {
+              path: 'sede',
+              populate: {
+                path: 'centro',
+                populate: {
+                  path: 'regional',
+                },
+              },
+            },
+          },
+        ],
+      })
       .populate('programa')
       .populate('instructor');
   }

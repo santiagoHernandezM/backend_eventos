@@ -185,6 +185,11 @@ export class UsersService {
 
   /* Todos los metodos de actualizar */
   async actualizarUsuario(usuario: ActualizarUserDto) {
+    if (usuario.password != null && usuario.password != '') {
+      usuario.password = bcrypt.hashSync(usuario.password, 10);
+    } else {
+      delete usuario.password;
+    }
     return await this.userModel
       .findByIdAndUpdate(usuario.id, usuario)
       .then((data) => {
