@@ -11,7 +11,6 @@ export type AmbienteDocument = HydratedDocument<Ambiente>;
 export class Ambiente {
   @Prop({
     required: true,
-    unique: true,
   })
   codigo: string;
 

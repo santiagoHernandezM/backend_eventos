@@ -58,6 +58,8 @@ export class AmbienteService {
   ): Promise<IAmbiente> {
     const found = await this.ambienteModel.findOne({
       codigo: ambienteCreatedDto.codigo,
+      sede: ambienteCreatedDto.sede,
+      bloque: ambienteCreatedDto.bloque,
     });
     if (found) {
       throw new HttpException('El ambiente ya existe', HttpStatus.CONFLICT);
