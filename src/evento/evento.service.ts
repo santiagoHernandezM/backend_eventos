@@ -686,7 +686,7 @@ export class EventoService {
             year: year,
             mes: mes,
             documentoInstructor: evento.instructor.documento,
-            nombreInstructor: evento.instructor.nombre,
+            nombreInstructor: `${evento.instructor.nombre} ${evento.instructor.apellido}`,
             numeroFicha: e.ficha.codigo,
             programa: e.programa.nombre,
             horaInicio: horas[0],
