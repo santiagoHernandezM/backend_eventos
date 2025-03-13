@@ -94,6 +94,7 @@ export class ProgramaService {
   ): Promise<NotFoundException | Programa> {
     let existe: any = await this.ProgramaModel.exists({
       codigo: ProgramaDto.codigo,
+      version: ProgramaDto.version,
       intensidad_horaria: ProgramaDto.intensidad_horaria,
     });
 
@@ -101,7 +102,7 @@ export class ProgramaService {
 
     if (existe) {
       return new NotFoundException(
-        `Ya existe un programa con el codigo ${ProgramaDto.codigo}`,
+        `Ya existe un programa con el codigo ${ProgramaDto.codigo} y la versión ${ProgramaDto.version}`,
       );
     }
 
