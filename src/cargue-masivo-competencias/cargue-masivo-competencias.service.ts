@@ -51,7 +51,7 @@ export class CargueMasivoCompetenciasService {
       for await (const competencia of excelJson[hoja]) {
         const compe = {
           codigo: competencia['A'], //Código de la competencia en la Columna A del excel
-          nombre: competencia['B'], //Nombre de la competencia en la Columna B del excel
+          nombre: competencia['B'].toUpperCase(), //Nombre de la competencia en la Columna B del excel
           duracion: parseInt(competencia['C']),
           resultados: [],
         };
@@ -61,7 +61,7 @@ export class CargueMasivoCompetenciasService {
         for (let x = 3; x < columnas.length; x += 3) {
           if (competencia[columnas[x]] != '') {
             const pq = {
-              descripcion: competencia[columnas[x]],
+              descripcion: competencia[columnas[x]].toUpperCase(),
               orden: competencia[columnas[x + 1]],
               duracion: parseInt(competencia[columnas[x + 2]]),
             };
